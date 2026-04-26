@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>License Search Portal</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: #fff;
+      padding: 28px 20px 22px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    }
+    header h1 { font-size: 1.9rem; letter-spacing: 0.5px; }
+    header p  { margin-top: 6px; font-size: 0.95rem; opacity: 0.85; }
+
+    /* ── Main Container ── */
+    main { max-width: 860px; margin: 36px auto; padding: 0 16px 60px; }
+
+    /* ── Search Card ── */
+    .search-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px 28px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+    .search-card h2 {
+      font-size: 1.1rem;
+      color: #1a365d;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #ebf4ff;
+    }
+
+    /* ── Grid of inputs ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .form-group label .required { color: #e53e3e; margin-left: 2px; }
+
+    .form-group input,
+    .form-group select {
+      padding: 11px 14px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.97rem;
+      color: #2d3748;
+      background: #f7fafc;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49,130,206,0.15);
+      background: #fff;
+    }
+    .form-group input.error { border-color: #e53e3e; }
+
+    /* Category row – spans full width, hidden by default */
+    .category-row {
+      grid-column: 1 / -1;
+      display: none;
+    }
+    .category-row.visible { display: flex; flex-direction: column; gap: 6px; }
+
+    /* Date filter row */
+    .date-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 560px) { .date-row { grid-template-columns: 1fr; } }
+
+    .date-row-label {
+      grid-column: 1 / -1;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: -8px;
+    }
+
+    /* ── Action row ── */
+    .action-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 11px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: #2b6cb0;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(43,108,176,0.35);
+    }
+    .btn-primary:hover { background: #1a4e8a; }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    /* ── Status bar ── */
+    .status-bar {
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: #718096;
+      min-height: 20px;
+    }
+    .status-bar .count { font-weight: 700; color: #2b6cb0; }
+
+    /* ── Error message ── */
+    .error-msg {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #fff5f5;
+      border-left: 4px solid #e53e3e;
+      border-radius: 6px;
+      color: #c53030;
+      font-size: 0.9rem;
+    }
+    .error-msg.visible { display: block; }
+
+    /* ── Results ── */
+    #results { margin-top: 28px; display: flex; flex-direction: column; gap: 16px; }
+
+    .result-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      border-left: 5px solid #2b6cb0;
+      animation: slideIn 0.22s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card.suspended { border-left-color: #e53e3e; }
+    .result-card.expired   { border-left-color: #dd6b20; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .card-header .name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a365d;
+    }
+    .card-header .license-badge {
+      background: #ebf8ff;
+      color: #2b6cb0;
+      border: 1px solid #bee3f8;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .badge-Active    { background: #c6f6d5; color: #22543d; }
+    .badge-Suspended { background: #fed7d7; color: #742a2a; }
+    .badge-Expired   { background: #feebc8; color: #7b341e; }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px;
+    }
+    .detail-item { display: flex; flex-direction: column; gap: 2px; }
+    .detail-item .label {
+      font-size: 0.73rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #a0aec0;
+    }
+    .detail-item .value {
+      font-size: 0.93rem;
+      color: #2d3748;
+      font-weight: 500;
+    }
+
+    /* ── No results ── */
+    .no-results {
+      text-align: center;
+      padding: 48px 20px;
+      color: #718096;
+    }
+    .no-results .icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-results p { font-size: 1rem; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 0.82rem;
+      color: #a0aec0;
+    }
+
+    /* ── Loader ── */
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 30px;
+      color: #718096;
+    }
+    .loader.visible { display: block; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #3182ce;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#128269; License Search Portal</h1>
+  <p>Search registered licenses by name or license number</p>
+</header>
+
+<main>
+  <!-- ── Search Card ── -->
+  <div class="search-card">
+    <h2>Search Records</h2>
+
+    <div class="form-grid">
+      <!-- Name -->
+      <div class="form-group">
+        <label for="inp-name">Name</label>
+        <input type="text" id="inp-name" placeholder="Enter full or partial name" autocomplete="off" />
+      </div>
+
+      <!-- License Number -->
+      <div class="form-group">
+        <label for="inp-license">License Number</label>
+        <input type="text" id="inp-license" placeholder="e.g. LIC-2026-001" autocomplete="off" />
+      </div>
+
+      <!-- Category (shown only when searching by name only) -->
+      <div class="form-group category-row" id="category-row">
+        <label for="inp-category">Category <span class="required">*</span> <small style="font-weight:400;text-transform:none;font-size:0.8em;color:#718096;">(required when searching by name)</small></label>
+        <select id="inp-category">
+          <option value="">-- Select Category --</option>
+          <option value="Civil Engineer">Civil Engineer</option>
+          <option value="Electrical Engineer">Electrical Engineer</option>
+          <option value="Mechanical Engineer">Mechanical Engineer</option>
+          <option value="Architect">Architect</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- Date range filter -->
+      <div class="date-row" id="date-row">
+        <div class="date-row-label">Date Filter (optional)</div>
+        <div class="form-group">
+          <label for="inp-date-from">From Date</label>
+          <input type="date" id="inp-date-from" />
+        </div>
+        <div class="form-group">
+          <label for="inp-date-to">To Date</label>
+          <input type="date" id="inp-date-to" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-msg" id="error-msg"></div>
+
+    <!-- Buttons -->
+    <div class="action-row">
+      <button class="btn btn-primary" id="btn-search" onclick="handleSearch()">&#128269; Search</button>
+      <button class="btn btn-secondary" onclick="clearAll()">&#10005; Clear</button>
+    </div>
+
+    <!-- Status -->
+    <div class="status-bar" id="status-bar"></div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    Loading records…
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+</main>
+
+<footer>
+  Data updated daily &bull; Last updated: <span id="last-updated">—</span>
+</footer>
+
+<script>
+  /* ────────────────────────────────────────────
+     State
+  ──────────────────────────────────────────── */
+  let allRecords = [];
+
+  /* ────────────────────────────────────────────
+     Load data on page load
+  ──────────────────────────────────────────── */
+  async function loadData() {
+    showLoader(true);
+    try {
+      // Cache-bust so GitHub always serves the latest file
+      const res = await fetch('data/records.json?t=' + Date.now());
+      if (!res.ok) throw new Error('Network error');
+      const json = await res.json();
+      allRecords = json.records || [];
+      document.getElementById('last-updated').textContent = json.lastUpdated || '—';
+      // Pre-populate To Date with today so filter works intuitively
+      document.getElementById('inp-date-to').value = new Date().toISOString().slice(0, 10);
+    } catch (e) {
+      showResults([], true);
+    } finally {
+      showLoader(false);
+    }
+  }
+
+  /* ────────────────────────────────────────────
+     Dynamic category row visibility
+  ──────────────────────────────────────────── */
+  const inpName    = document.getElementById('inp-name');
+  const inpLicense = document.getElementById('inp-license');
+  const catRow     = document.getElementById('category-row');
+
+  function updateCategoryVisibility() {
+    const nameVal    = inpName.value.trim();
+    const licenseVal = inpLicense.value.trim();
+    // Show category only when name is entered AND license is empty
+    if (nameVal && !licenseVal) {
+      catRow.classList.add('visible');
+    } else {
+      catRow.classList.remove('visible');
+      document.getElementById('inp-category').value = '';
+    }
+  }
+
+  inpName.addEventListener('input', updateCategoryVisibility);
+  inpLicense.addEventListener('input', updateCategoryVisibility);
+
+  // Allow pressing Enter to search
+  [inpName, inpLicense, document.getElementById('inp-category'),
+   document.getElementById('inp-date-from'), document.getElementById('inp-date-to')]
+    .forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') handleSearch(); }));
+
+  /* ────────────────────────────────────────────
+     Search logic
+  ──────────────────────────────────────────── */
+  function handleSearch() {
+    clearError();
+    const name      = inpName.value.trim().toLowerCase();
+    const license   = inpLicense.value.trim().toLowerCase();
+    const category  = document.getElementById('inp-category').value;
+    const dateFrom  = document.getElementById('inp-date-from').value;
+    const dateTo    = document.getElementById('inp-date-to').value;
+    const catRowVisible = catRow.classList.contains('visible');
+
+    // Validation
+    if (!name && !license) {
+      showError('Please enter a Name or License Number to search.');
+      return;
+    }
+    if (name && !license && !category) {
+      showError('Category is required when searching by Name only. Please select a category.');
+      document.getElementById('inp-category').classList.add('error');
+      return;
+    }
+
+    let results = allRecords.filter(r => {
+      const matchName    = name    ? r.name.toLowerCase().includes(name)          : true;
+      const matchLicense = license ? r.licenseNumber.toLowerCase().includes(license) : true;
+      const matchCat     = (catRowVisible && category)
+                             ? r.category === category
+                             : true;
+      const recordDate   = r.date || '';
+      const matchFrom    = dateFrom ? recordDate >= dateFrom : true;
+      const matchTo      = dateTo   ? recordDate <= dateTo   : true;
+
+      return matchName && matchLicense && matchCat && matchFrom && matchTo;
+    });
+
+    showResults(results);
+  }
+
+  /* ────────────────────────────────────────────
+     Render results
+  ──────────────────────────────────────────── */
+  function showResults(records, loadError = false) {
+    const container = document.getElementById('results');
+    const statusBar = document.getElementById('status-bar');
+    container.innerHTML = '';
+
+    if (loadError) {
+      container.innerHTML = `
+        <div class="no-results">
+          <div class="icon">⚠️</div>
+          <p>Could not load records. Please check your connection or try again later.</p>
+        </div>`;
+      statusBar.innerHTML = '';
+      return;
+    }
+
+    if (records.length === 0) {
+      container.innerHTML = `
+        <div class="no-results">
+          <div class="icon">🔍</div>
+          <p>No matching records found. Try different search terms.</p>
+        </div>`;
+      statusBar.innerHTML = `Found <span class="count">0</span> result(s).`;
+      return;
+    }
+
+    statusBar.innerHTML = `Found <span class="count">${records.length}</span> result(s).`;
+
+    records.forEach(r => {
+      const statusClass = r.status === 'Active' ? 'Active' :
+                          r.status === 'Suspended' ? 'Suspended' : 'Expired';
+      const cardClass   = r.status === 'Suspended' ? 'suspended' :
+                          r.status === 'Expired'   ? 'expired'   : '';
+
+      const card = document.createElement('div');
+      card.className = `result-card ${cardClass}`;
+      card.innerHTML = `
+        <div class="card-header">
+          <div>
+            <span class="name">${esc(r.name)}</span>
+            <span class="badge-status badge-${statusClass}">${esc(r.status)}</span>
+          </div>
+          <span class="license-badge">${esc(r.licenseNumber)}</span>
+        </div>
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="label">Category</span>
+            <span class="value">${esc(r.category)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Organization</span>
+            <span class="value">${esc(r.organization || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Phone</span>
+            <span class="value">${esc(r.phone || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Address</span>
+            <span class="value">${esc(r.address || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Issued Date</span>
+            <span class="value">${esc(r.issuedDate || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Expiry Date</span>
+            <span class="value">${esc(r.expiryDate || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Record Date</span>
+            <span class="value">${esc(r.date || '—')}</span>
+          </div>
+        </div>`;
+      container.appendChild(card);
+    });
+  }
+
+  /* ────────────────────────────────────────────
+     Helpers
+  ──────────────────────────────────────────── */
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+
+  function clearError() {
+    const el = document.getElementById('error-msg');
+    el.textContent = '';
+    el.classList.remove('visible');
+    document.getElementById('inp-category').classList.remove('error');
+  }
+
+  function showLoader(on) {
+    document.getElementById('loader').classList.toggle('visible', on);
+  }
+
+  function clearAll() {
+    inpName.value = '';
+    inpLicense.value = '';
+    document.getElementById('inp-category').value = '';
+    document.getElementById('inp-date-from').value = '';
+    document.getElementById('inp-date-to').value = new Date().toISOString().slice(0, 10);
+    catRow.classList.remove('visible');
+    clearError();
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('status-bar').innerHTML = '';
+  }
+
+  /* ── Init ── */
+  loadData();
+</script>
+</body>
+</html>
