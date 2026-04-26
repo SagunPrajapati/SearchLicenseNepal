@@ -1,1 +1,202 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Driving License Search Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Nepali&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--blk:#0c0c0c;--wht:#f4efe5;--red:#b82016;--gold:#c4901e;--card:#f4efe5;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--blk);color:var(--blk);min-height:100vh;}
+.bg{position:fixed;inset:0;z-index:0;background:var(--blk);}.bg svg{width:100%;height:100%;}
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+header{text-align:center;padding:52px 20px 36px;}
+.lotus{width:60px;height:60px;margin:0 auto 18px;}
+header h1{font-family:'Tiro Devanagari Nepali',serif;font-size:clamp(1.55rem,3.8vw,2.4rem);color:var(--wht);line-height:1.3;}
+header h1 small{display:block;font-family:'DM Sans',sans-serif;font-weight:300;font-size:0.52em;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-top:7px;}
+.stripe-div{margin:18px auto 0;width:min(500px,88vw);height:22px;overflow:hidden;}
+header p{margin-top:12px;color:rgba(244,239,229,0.42);font-size:0.87rem;font-weight:300;}
+main{flex:1;max-width:900px;margin:0 auto;width:100%;padding:0 14px 80px;}
+.stats{display:none;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+.stats.on{display:flex;}
+.stat{text-align:center;border:1px solid rgba(244,239,229,0.14);border-radius:8px;padding:10px 18px;background:rgba(244,239,229,0.04);min-width:110px;}
+.stat strong{display:block;font-family:'Tiro Devanagari Nepali',serif;font-size:1.5rem;color:var(--gold);line-height:1;margin-bottom:3px;}
+.stat span{font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(244,239,229,0.38);}
+.ds-bar{display:none;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.ds-bar.on{display:flex;}
+.ds-label{font-size:0.7rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(244,239,229,0.5);white-space:nowrap;}
+.ds-btn{padding:5px 14px;border:1.5px solid rgba(244,239,229,0.2);border-radius:3px;font-size:0.75rem;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;background:rgba(244,239,229,0.05);color:rgba(244,239,229,0.55);transition:all .15s;}
+.ds-btn:hover{border-color:var(--gold);color:var(--gold);}
+.ds-btn.active{background:var(--gold);border-color:var(--gold);color:var(--blk);}
+.card{background:var(--card);border-top:4px solid var(--red);border-bottom:4px solid var(--red);box-shadow:0 0 0 1px rgba(196,144,30,0.35),0 18px 56px rgba(0,0,0,0.55);overflow:hidden;}
+.band{height:18px;background:var(--blk);overflow:hidden;}.band svg{width:100%;height:18px;display:block;}
+.card-body{padding:26px 26px 22px;background:var(--card);}
+.card-title{font-family:'Tiro Devanagari Nepali',serif;font-size:1.05rem;color:var(--blk);margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid var(--blk);display:flex;align-items:center;gap:9px;}
+.card-title::before{content:'';display:inline-block;width:16px;height:16px;background:var(--blk);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+@media(max-width:520px){.fg{grid-template-columns:1fr;}}
+.full{grid-column:1/-1;}
+.fitem{display:flex;flex-direction:column;gap:5px;}
+.fitem label{font-size:0.68rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#555;}
+.fitem input{padding:10px 13px;border:1.5px solid #c5bba8;border-radius:2px;font-size:0.94rem;font-family:'DM Sans',sans-serif;color:var(--blk);background:#fdfaf3;outline:none;transition:border-color .15s,box-shadow .15s;}
+.fitem input:focus{border-color:var(--blk);box-shadow:3px 3px 0 var(--blk);background:#fff;}
+.fitem input::placeholder{color:#bbb;}
+.act{display:flex;gap:11px;margin-top:18px;flex-wrap:wrap;}
+.btn{padding:10px 28px;border:2px solid var(--blk);border-radius:2px;font-size:0.9rem;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:box-shadow .12s,transform .1s;display:inline-flex;align-items:center;gap:7px;}
+.btn:active{transform:translate(2px,2px);box-shadow:none!important;}
+.bp{background:var(--blk);color:var(--wht);box-shadow:4px 4px 0 var(--red);}.bp:hover{box-shadow:2px 2px 0 var(--red);}
+.bs{background:transparent;color:var(--blk);box-shadow:4px 4px 0 #bbb;}.bs:hover{box-shadow:2px 2px 0 #bbb;}
+.sbar{margin-top:13px;font-size:0.84rem;color:#666;min-height:18px;}
+.sbar .n{font-weight:700;color:var(--red);}
+.err{display:none;margin-top:11px;padding:9px 13px;background:#fff0ee;border-left:4px solid var(--red);color:var(--red);font-size:0.87rem;}
+.err.on{display:block;}
+.ldr{display:none;text-align:center;padding:38px;}.ldr.on{display:block;}
+.spin{width:38px;height:38px;border:3px solid rgba(244,239,229,.12);border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 11px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.ldr p{color:rgba(244,239,229,.38);font-size:.87rem;}
+#results{margin-top:22px;display:flex;flex-direction:column;gap:11px;}
+.rc{background:var(--card);border-left:5px solid var(--blk);padding:16px 20px;box-shadow:4px 4px 0 rgba(0,0,0,.32);animation:ri .17s ease;}
+@keyframes ri{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.rc:nth-child(3n+2){border-left-color:var(--red);}.rc:nth-child(3n+3){border-left-color:var(--gold);}
+.rh{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:11px;}
+.rsn{font-size:0.63rem;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:#999;margin-bottom:2px;}
+.rname{font-family:'Tiro Devanagari Nepali',serif;font-size:1.05rem;font-weight:700;color:var(--blk);}
+.ltag{background:var(--blk);color:var(--wht);font-size:0.73rem;font-weight:600;padding:4px 11px;letter-spacing:.4px;white-space:nowrap;}
+.rd{display:flex;gap:20px;flex-wrap:wrap;border-top:1px solid #ddd;padding-top:11px;}
+.di{display:flex;flex-direction:column;gap:3px;}
+.dl{font-size:0.63rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#999;}
+.dv{font-size:0.88rem;font-weight:500;color:var(--blk);}
+.chips{display:flex;flex-wrap:wrap;gap:5px;}
+.chip{display:inline-block;padding:2px 9px;background:var(--blk);color:var(--wht);font-size:.7rem;font-weight:700;}
+.src-tag{display:inline-block;padding:2px 9px;background:var(--red);color:var(--wht);font-size:.68rem;font-weight:700;}
+.empty{text-align:center;padding:50px 20px;color:rgba(244,239,229,.35);}
+.empty .ic{font-size:2.5rem;display:block;margin-bottom:12px;}.empty p{font-size:.94rem;}
+footer{position:relative;z-index:1;text-align:center;padding:18px;font-size:.74rem;color:rgba(244,239,229,.22);border-top:1px solid rgba(244,239,229,.07);}
+footer strong{color:rgba(244,239,229,.38);}
+</style>
+</head>
+<body>
+<div class="bg"><svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><defs><pattern id="ikat" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse"><polygon points="20,1 39,20 20,39 1,20" fill="none" stroke="rgba(244,239,229,0.08)" stroke-width="0.7"/><polygon points="20,7 33,20 20,33 7,20" fill="none" stroke="rgba(244,239,229,0.05)" stroke-width="0.5"/><circle cx="20" cy="20" r="1.8" fill="rgba(244,239,229,0.07)"/><line x1="20" y1="1" x2="20" y2="6" stroke="rgba(244,239,229,0.10)" stroke-width="1"/><line x1="39" y1="20" x2="34" y2="20" stroke="rgba(244,239,229,0.10)" stroke-width="1"/><line x1="20" y1="39" x2="20" y2="34" stroke="rgba(244,239,229,0.10)" stroke-width="1"/><line x1="1" y1="20" x2="6" y2="20" stroke="rgba(244,239,229,0.10)" stroke-width="1"/></pattern><pattern id="band" x="0" y="0" width="20" height="40" patternUnits="userSpaceOnUse"><polygon points="0,0 10,8 20,0" fill="rgba(244,239,229,0.14)"/><polygon points="0,0 0,16 10,8" fill="rgba(244,239,229,0.08)"/><polygon points="20,0 20,16 10,8" fill="rgba(244,239,229,0.08)"/><polygon points="0,16 10,24 20,16" fill="rgba(244,239,229,0.10)"/><polygon points="0,16 0,32 10,24" fill="rgba(244,239,229,0.06)"/><polygon points="20,16 20,32 10,24" fill="rgba(244,239,229,0.06)"/><polygon points="0,32 10,40 20,32" fill="rgba(244,239,229,0.14)"/><polygon points="0,32 0,40 10,40" fill="rgba(244,239,229,0.08)"/><polygon points="20,32 20,40 10,40" fill="rgba(244,239,229,0.08)"/></pattern><radialGradient id="glow" cx="50%" cy="42%" r="55%"><stop offset="0%" stop-color="#1b1b32" stop-opacity="0.55"/><stop offset="100%" stop-color="#0c0c0c" stop-opacity="0"/></radialGradient><pattern id="vchev" x="0" y="0" width="28" height="14" patternUnits="userSpaceOnUse"><polyline points="0,14 14,0 28,14" fill="none" stroke="rgba(244,239,229,0.15)" stroke-width="1.2"/></pattern></defs><rect width="100%" height="100%" fill="url(#ikat)"/><rect x="0" y="0" width="100%" height="110" fill="url(#band)"/><rect x="0" y="109" width="100%" height="4" fill="#b82016" opacity="0.85"/><rect x="0" y="113" width="100%" height="1.5" fill="#c4901e" opacity="0.65"/><rect x="0" y="calc(100% - 110px)" width="100%" height="110" fill="url(#band)"/><rect x="0" y="calc(100% - 113px)" width="100%" height="4" fill="#b82016" opacity="0.85"/><rect x="0" y="calc(100% - 114.5px)" width="100%" height="1.5" fill="#c4901e" opacity="0.65"/><rect x="0" y="0" width="28" height="100%" fill="url(#vchev)"/><rect x="27" y="0" width="3" height="100%" fill="#b82016" opacity="0.6"/><rect x="calc(100% - 28px)" y="0" width="28" height="100%" fill="url(#vchev)"/><rect x="calc(100% - 30px)" y="0" width="3" height="100%" fill="#b82016" opacity="0.6"/><rect width="100%" height="100%" fill="url(#glow)"/></svg></div>
+<div class="page">
+<header>
+<svg class="lotus" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" fill="none"><circle cx="30" cy="30" r="28" stroke="#c4901e" stroke-width="1.2" opacity="0.55"/><circle cx="30" cy="30" r="20" stroke="#c4901e" stroke-width="0.8" opacity="0.4"/><circle cx="30" cy="30" r="12" fill="rgba(196,144,30,0.1)" stroke="#c4901e" stroke-width="1"/><circle cx="30" cy="30" r="3.5" fill="#c4901e" opacity="0.8"/><g stroke="#c4901e" stroke-width="0.9" opacity="0.65"><line x1="30" y1="2" x2="30" y2="17"/><line x1="30" y1="43" x2="30" y2="58"/><line x1="2" y1="30" x2="17" y2="30"/><line x1="43" y1="30" x2="58" y2="30"/><line x1="8.9" y1="8.9" x2="19.4" y2="19.4"/><line x1="40.6" y1="40.6" x2="51.1" y2="51.1"/><line x1="51.1" y1="8.9" x2="40.6" y2="19.4"/><line x1="19.4" y1="40.6" x2="8.9" y2="51.1"/></g><polygon points="30,2 33,10 30,18 27,10" fill="#c4901e" opacity="0.55"/><polygon points="30,42 33,50 30,58 27,50" fill="#c4901e" opacity="0.55"/><polygon points="2,30 10,27 18,30 10,33" fill="#c4901e" opacity="0.55"/><polygon points="42,30 50,27 58,30 50,33" fill="#c4901e" opacity="0.55"/></svg>
+<h1>Driving License Search<small>&#2326;&#2379;&#2332; &#2346;&#2379;&#2352;&#2381;&#2335;&#2354; &nbsp;&#183;&nbsp; Official Registry</small></h1>
+<div class="stripe-div"><svg viewBox="0 0 500 22" width="100%" height="22" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="4.5" width="500" height="3" fill="#b82016" opacity="0.82"/><rect x="0" y="14.5" width="500" height="3" fill="#b82016" opacity="0.82"/><g fill="rgba(244,239,229,0.82)"><polygon points="10,11 14,6.5 18,11 14,15.5"/><polygon points="50,11 54,6.5 58,11 54,15.5"/><polygon points="90,11 94,6.5 98,11 94,15.5"/><polygon points="130,11 134,6.5 138,11 134,15.5"/><polygon points="170,11 174,6.5 178,11 174,15.5"/><polygon points="210,11 214,6.5 218,11 214,15.5"/><polygon points="250,11 254,6.5 258,11 254,15.5"/><polygon points="290,11 294,6.5 298,11 294,15.5"/><polygon points="330,11 334,6.5 338,11 334,15.5"/><polygon points="370,11 374,6.5 378,11 374,15.5"/><polygon points="410,11 414,6.5 418,11 414,15.5"/><polygon points="450,11 454,6.5 458,11 454,15.5"/><polygon points="490,11 494,6.5 498,11 494,15.5"/></g><g fill="#c4901e" opacity="0.92"><polygon points="30,11 34,6.5 38,11 34,15.5"/><polygon points="70,11 74,6.5 78,11 74,15.5"/><polygon points="110,11 114,6.5 118,11 114,15.5"/><polygon points="150,11 154,6.5 158,11 154,15.5"/><polygon points="190,11 194,6.5 198,11 194,15.5"/><polygon points="230,11 234,6.5 238,11 234,15.5"/><polygon points="270,11 274,6.5 278,11 274,15.5"/><polygon points="310,11 314,6.5 318,11 314,15.5"/><polygon points="350,11 354,6.5 358,11 354,15.5"/><polygon points="390,11 394,6.5 398,11 394,15.5"/><polygon points="430,11 434,6.5 438,11 434,15.5"/><polygon points="470,11 474,6.5 478,11 474,15.5"/></g></svg></div>
+<p>Search across all distribution records — all dates combined</p>
+</header>
+<main>
+<div class="stats" id="stats"><div class="stat"><strong id="st-tot">-</strong><span>Total Records</span></div><div class="stat"><strong id="st-ds">-</strong><span>Datasets Loaded</span></div><div class="stat"><strong id="st-latest">-</strong><span>Latest Date</span></div></div>
+<div class="ds-bar" id="ds-bar"><span class="ds-label">Filter by date:</span><button class="ds-btn active" data-ds="all" onclick="setDS('all')">All Dates</button></div>
+<div class="card">
+<div class="band"><svg viewBox="0 0 860 18" width="100%" height="18" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><rect width="860" height="18" fill="#0c0c0c"/><g fill="rgba(244,239,229,0.18)"><polygon points="5,9 9,4 13,9 9,14"/><polygon points="45,9 49,4 53,9 49,14"/><polygon points="85,9 89,4 93,9 89,14"/><polygon points="125,9 129,4 133,9 129,14"/><polygon points="165,9 169,4 173,9 169,14"/><polygon points="205,9 209,4 213,9 209,14"/><polygon points="245,9 249,4 253,9 249,14"/><polygon points="285,9 289,4 293,9 289,14"/><polygon points="325,9 329,4 333,9 329,14"/><polygon points="365,9 369,4 373,9 369,14"/><polygon points="405,9 409,4 413,9 409,14"/><polygon points="445,9 449,4 453,9 449,14"/><polygon points="485,9 489,4 493,9 489,14"/><polygon points="525,9 529,4 533,9 529,14"/><polygon points="565,9 569,4 573,9 569,14"/><polygon points="605,9 609,4 613,9 609,14"/><polygon points="645,9 649,4 653,9 649,14"/><polygon points="685,9 689,4 693,9 689,14"/><polygon points="725,9 729,4 733,9 729,14"/><polygon points="765,9 769,4 773,9 769,14"/><polygon points="805,9 809,4 813,9 809,14"/><polygon points="845,9 849,4 853,9 849,14"/></g><g fill="#c4901e" opacity="0.85"><polygon points="25,9 29,4 33,9 29,14"/><polygon points="65,9 69,4 73,9 69,14"/><polygon points="105,9 109,4 113,9 109,14"/><polygon points="145,9 149,4 153,9 149,14"/><polygon points="185,9 189,4 193,9 189,14"/><polygon points="225,9 229,4 233,9 229,14"/><polygon points="265,9 269,4 273,9 269,14"/><polygon points="305,9 309,4 313,9 309,14"/><polygon points="345,9 349,4 353,9 349,14"/><polygon points="385,9 389,4 393,9 389,14"/><polygon points="425,9 429,4 433,9 429,14"/><polygon points="465,9 469,4 473,9 469,14"/><polygon points="505,9 509,4 513,9 509,14"/><polygon points="545,9 549,4 553,9 549,14"/><polygon points="585,9 589,4 593,9 589,14"/><polygon points="625,9 629,4 633,9 629,14"/><polygon points="665,9 669,4 673,9 669,14"/><polygon points="705,9 709,4 713,9 709,14"/><polygon points="745,9 749,4 753,9 749,14"/><polygon points="785,9 789,4 793,9 789,14"/><polygon points="825,9 829,4 833,9 829,14"/></g></svg></div>
+<div class="card-body">
+<div class="card-title">Search Records</div>
+<div class="fg">
+<div class="fitem"><label for="n">Holder Name</label><input id="n" type="text" placeholder="Full or partial name" autocomplete="off"/></div>
+<div class="fitem"><label for="l">License Number</label><input id="l" type="text" placeholder="e.g. 01-06-00427837" autocomplete="off"/></div>
+<div class="fitem full"><label for="c">Category (optional)</label><input id="c" type="text" placeholder="e.g. A or B, K or F, G" autocomplete="off"/></div>
+</div>
+<div class="err" id="err"></div>
+<div class="act">
+<button class="btn bp" onclick="go()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</button>
+<button class="btn bs" onclick="cl()">X Clear</button>
+</div>
+<div class="sbar" id="sbar"></div>
+</div>
+<div class="band"><svg viewBox="0 0 860 18" width="100%" height="18" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><rect width="860" height="18" fill="#0c0c0c"/><g fill="rgba(244,239,229,0.12)"><polygon points="5,9 9,4 13,9 9,14"/><polygon points="85,9 89,4 93,9 89,14"/><polygon points="165,9 169,4 173,9 169,14"/><polygon points="245,9 249,4 253,9 249,14"/><polygon points="325,9 329,4 333,9 329,14"/><polygon points="405,9 409,4 413,9 409,14"/><polygon points="485,9 489,4 493,9 489,14"/><polygon points="565,9 569,4 573,9 569,14"/><polygon points="645,9 649,4 653,9 649,14"/><polygon points="725,9 729,4 733,9 729,14"/><polygon points="805,9 809,4 813,9 809,14"/></g></svg></div>
+</div>
+<div class="ldr" id="ldr"><div class="spin"></div><p>Loading all datasets...</p></div>
+<div id="results"></div>
+</main>
+<footer>Datasets: <strong><span id="fu">-</span></strong> &nbsp;.&nbsp; Total records: <strong><span id="fd">-</span></strong></footer>
+</div>
+<script>
+var ALL=[],ADS='all';
+async function init(){
+  tog('ldr',true);
+  try{
+    var t='?t='+Date.now();
+    var mr=await fetch('manifest.json'+t);
+    if(!mr.ok)throw 0;
+    var mj=await mr.json();
+    var ds=mj.datasets||[];
+    var tasks=ds.map(function(d){
+      return fetch(d.file+t).then(function(r){return r.ok?r.json():null;})
+        .then(function(j){return j?(j.records||[]).map(function(r){return Object.assign({},r,{_ds:d.label});}):[]; })
+        .catch(function(){return[];});
+    });
+    var res=await Promise.all(tasks);
+    ALL=res.reduce(function(a,b){return a.concat(b);},[]);
+    var labels=ds.map(function(d){return d.label;});
+    q('#st-tot').textContent=ALL.length;
+    q('#st-ds').textContent=ds.length;
+    q('#st-latest').textContent=labels[labels.length-1]||'-';
+    q('#fu').textContent=labels.join(' | ');
+    q('#fd').textContent=ALL.length;
+    q('#stats').classList.add('on');
+    buildPills(ds);
+  }catch(e){
+    q('#results').innerHTML='<div class="empty"><span class="ic">!</span><p>Could not load manifest.json. Make sure it exists in your repo root.</p></div>';
+  }
+  tog('ldr',false);
+}
+function buildPills(ds){
+  var bar=q('#ds-bar');
+  ds.forEach(function(d){
+    var b=document.createElement('button');
+    b.className='ds-btn';b.dataset.ds=d.label;b.textContent=d.label;
+    b.onclick=function(){setDS(d.label);};
+    bar.appendChild(b);
+  });
+  if(ds.length>0)bar.classList.add('on');
+}
+function setDS(v){
+  ADS=v;
+  document.querySelectorAll('.ds-btn').forEach(function(b){b.classList.toggle('active',b.dataset.ds===v);});
+  var hasQ=q('#n').value.trim()||q('#l').value.trim()||q('#c').value.trim();
+  if(hasQ)go();
+}
+['n','l','c'].forEach(function(id){q('#'+id).addEventListener('keydown',function(ev){if(ev.key==='Enter')go();});});
+function go(){
+  q('#err').textContent='';q('#err').classList.remove('on');
+  var name=q('#n').value.trim().toLowerCase();
+  var lic=q('#l').value.trim().toLowerCase();
+  var cat=q('#c').value.trim().toLowerCase();
+  if(!name&&!lic&&!cat){showErr('Please enter at least one search term.');return;}
+  var pool=ADS==='all'?ALL:ALL.filter(function(r){return r._ds===ADS;});
+  var hits=pool.filter(function(r){
+    return(name?r.name.toLowerCase().indexOf(name)>=0:true)&&
+      (lic?r.licenseNumber.toLowerCase().indexOf(lic)>=0:true)&&
+      (cat?r.category.toLowerCase().indexOf(cat)>=0:true);
+  });
+  render(hits);
+}
+function render(list){
+  var el=q('#results'),bar=q('#sbar');
+  el.innerHTML='';
+  if(!list.length){
+    bar.innerHTML='Found <span class="n">0</span> result(s).';
+    el.innerHTML='<div class="empty"><span class="ic">?</span><p>No matching records found.</p></div>';
+    return;
+  }
+  bar.innerHTML='Found <span class="n">'+list.length+'</span> result(s).';
+  list.forEach(function(r){
+    var chips=(r.category||'').split(',').map(function(c){return c.trim();}).filter(Boolean).map(function(c){return'<span class="chip">'+e(c)+'</span>';}).join('');
+    var d=document.createElement('div');d.className='rc';
+    d.innerHTML='<div class="rh"><div><div class="rsn">S.N. '+e(String(r.sn||'-'))+'</div><div class="rname">'+e(r.name)+'</div></div><span class="ltag">'+e(r.licenseNumber)+'</span></div>'
+      +'<div class="rd"><div class="di"><span class="dl">Category</span><div class="chips">'+(chips||'-')+'</div></div>'
+      +'<div class="di"><span class="dl">Distribution Date</span><span class="dv">'+e(r.distributionReadyDate||'-')+'</span></div>'
+      +'<div class="di"><span class="dl">Dataset</span><span class="src-tag">'+e(r._ds||'-')+'</span></div></div>';
+    el.appendChild(d);
+  });
+}
+function cl(){['n','l','c'].forEach(function(id){q('#'+id).value='';});q('#err').textContent='';q('#err').classList.remove('on');q('#results').innerHTML='';q('#sbar').innerHTML='';}
+function showErr(m){q('#err').textContent=m;q('#err').classList.add('on');}
+function tog(id,on){q('#'+id).classList.toggle('on',on);}
+function q(s){return document.querySelector(s);}
+function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+init();
+</script>
+</body>
+</html>
