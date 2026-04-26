@@ -529,11 +529,11 @@
   async function init() {
     tog('ldr', true);
     try {
-      const r = await fetch('data/records.json?t=' + Date.now());
+      const r = await fetch('2083-02-10.json?t=' + Date.now());
       if (!r.ok) throw 0;
       const j = await r.json();
       DB = j.records || [];
-      const lu   = j.lastUpdated || '—';
+      const lu   = j.distributionReadyDate || '—';
       const dist = (DB[0] && DB[0].distributionReadyDate) || '—';
       q('#st-tot').textContent  = DB.length;
       q('#st-dist').textContent = dist;
@@ -542,7 +542,7 @@
       q('#fd').textContent      = dist;
       q('#stats').classList.add('on');
     } catch(e) {
-      q('#results').innerHTML = `<div class="empty"><span class="ic">⚠️</span><p>Could not load <code>data/records.json</code>. Check your GitHub repo structure.</p></div>`;
+      q('#results').innerHTML = `<div class="empty"><span class="ic">⚠️</span><p>Could not load <code>2083-02-10.json</code>. Check your GitHub repo structure.</p></div>`;
     }
     tog('ldr', false);
   }
