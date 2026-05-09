@@ -10,15 +10,15 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5f3ef;
+    --bg: #eef4f0;
     --surface: #ffffff;
-    --surface2: #f0ede8;
-    --border: #e0dbd3;
+    --surface2: #e8f0eb;
+    --border: #d6e4da;
     --text: #1a1815;
-    --text-muted: #7a7570;
-    --text-light: #b0aa9f;
+    --text-muted: #6b7a70;
+    --text-light: #a0b0a6;
     --accent: #2d6a4f;
-    --accent-light: #e8f5ee;
+    --accent-light: #e0f0e8;
     --accent-text: #1e4d38;
     --warn: #b45309;
     --warn-light: #fef3c7;
@@ -32,7 +32,12 @@
 
   body {
     font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
+    background:
+      radial-gradient(ellipse at 0% 0%, #c8e6d4 0%, transparent 55%),
+      radial-gradient(ellipse at 100% 0%, #d4eae0 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, #cde8da 0%, transparent 60%),
+      #e8f2ec;
+    background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
     padding: 0;
@@ -468,15 +473,11 @@ function processFile(file) {
 function buildReport(emp, headers, col, get) {
   const rows = emp.rows;
 
-  // Determine date range
-  const dates = rows.map(r => get(r, 'AttendanceDate')).filter(Boolean);
-  const dateFrom = dates[0] || '';
-  const dateTo = dates[dates.length - 1] || '';
-
-  // Also get Nepali dates if available
+  // Determine date range from AttendanceDateNepali only
   const nepaliDates = rows.map(r => get(r, 'AttendanceDateNepali')).filter(Boolean);
   const nepaliFrom = nepaliDates[0] || '';
   const nepaliTo = nepaliDates[nepaliDates.length - 1] || '';
+  const periodStr = nepaliFrom && nepaliTo ? `${nepaliFrom} – ${nepaliTo}` : 'Period not available';
 
   // Filter skip statuses
   const skipPattern = /holiday|weeklyoff|weekly off|leave/i;
@@ -502,9 +503,7 @@ function buildReport(emp, headers, col, get) {
   // Avatar initials
   const initials = emp.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
-  // Period string
-  let periodStr = dateFrom && dateTo ? `${dateFrom} – ${dateTo}` : 'Period not available';
-  if (nepaliFrom && nepaliTo) periodStr += ` &nbsp;·&nbsp; ${nepaliFrom} – ${nepaliTo}`;
+
 
   // Late rows HTML
   let lateRowsHtml = '';
@@ -571,14 +570,13 @@ function buildReport(emp, headers, col, get) {
   return `
     <div style="margin-bottom: 3rem;">
       <div class="greeting-text">Hello, ${emp.name}!</div>
-      <div class="greeting-sub">Your attendance report for the review period is summarised below.</div>
+      <div class="greeting-sub">Your attendance report for the review period <strong>${periodStr}</strong> is summarised below.</div>
 
       <div class="emp-card">
         <div class="avatar">${initials}</div>
         <div>
           <div class="emp-name">${emp.name} <span style="font-size:12px;font-weight:400;color:var(--text-muted);font-family:'DM Mono',monospace;">${emp.code}</span></div>
           <div class="emp-meta">${emp.designation} &nbsp;·&nbsp; ${emp.department} &nbsp;·&nbsp; ${emp.branch}</div>
-          <div class="emp-period">${periodStr}</div>
         </div>
       </div>
 
