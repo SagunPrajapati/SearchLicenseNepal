@@ -8,9 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #eef4f0;
     --surface: #ffffff;
     --surface2: #e8f0eb;
     --border: #d6e4da;
@@ -23,13 +21,16 @@
     --warn: #b45309;
     --warn-light: #fef3c7;
     --warn-text: #92400e;
+    --late-bg: #f0f7f3;
+    --late-hdr: #2d6a4f;
+    --missed-bg: #fff9f0;
+    --missed-hdr: #92400e;
     --danger: #991b1b;
     --danger-light: #fee2e2;
     --danger-text: #7f1d1d;
     --radius: 10px;
     --radius-lg: 16px;
   }
-
   body {
     font-family: 'DM Sans', sans-serif;
     background:
@@ -40,276 +41,112 @@
     background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
-    padding: 0;
   }
-
-  /* ── HEADER ── */
   header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 1.25rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem; display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 100;
   }
-
-  .logo-mark {
-    width: 36px; height: 36px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .logo-mark { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
   .logo-mark svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
-
-  .header-title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .header-title { font-size: 15px; font-weight: 600; }
   .header-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-
   .header-right { margin-left: auto; }
   .upload-new-btn {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 16px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
+    display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+    background: var(--accent); color: #fff; border: none; border-radius: var(--radius);
+    font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
   }
   .upload-new-btn:hover { background: var(--accent-text); }
   .upload-new-btn:active { transform: scale(0.98); }
   .upload-new-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-  /* ── MAIN LAYOUT ── */
-  main { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-
-  /* ── UPLOAD ZONE ── */
+  main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
   #upload-section { animation: fadeUp 0.4s ease both; }
-
-  .upload-hero {
-    text-align: center;
-    margin-bottom: 2.5rem;
-  }
-  .upload-hero h1 {
-    font-size: 28px;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    color: var(--text);
-    margin-bottom: 0.5rem;
-  }
-  .upload-hero p {
-    font-size: 15px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-
+  .upload-hero { text-align: center; margin-bottom: 2.5rem; }
+  .upload-hero h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  .upload-hero p { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
   .drop-zone {
-    border: 1.5px dashed var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    padding: 3.5rem 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    position: relative;
+    border: 1.5px dashed var(--border); border-radius: var(--radius-lg);
+    background: var(--surface); padding: 3.5rem 2rem; text-align: center;
+    cursor: pointer; position: relative; transition: border-color 0.2s, background 0.2s;
   }
-  .drop-zone:hover, .drop-zone.drag-over {
-    border-color: var(--accent);
-    background: var(--accent-light);
-  }
-
-  .drop-zone input[type="file"] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  }
-
-  .drop-icon {
-    width: 56px; height: 56px;
-    background: var(--accent-light);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1.25rem;
-  }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: var(--accent-light); }
+  .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { width: 56px; height: 56px; background: var(--accent-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
   .drop-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
   .drop-title { font-size: 16px; font-weight: 500; margin-bottom: 0.4rem; }
   .drop-sub { font-size: 13px; color: var(--text-muted); }
   .drop-sub span { color: var(--accent); font-weight: 500; }
-
-  .format-note {
-    margin-top: 1.5rem;
-    padding: 0.875rem 1.25rem;
-    background: var(--surface2);
-    border-radius: var(--radius);
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
+  .format-note { margin-top: 1.5rem; padding: 0.875rem 1.25rem; background: var(--surface2); border-radius: var(--radius); font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
   .format-note strong { color: var(--text); font-weight: 500; }
-
-  /* ── LOADING ── */
-  #loading-section {
-    display: none;
-    text-align: center;
-    padding: 4rem 0;
-    animation: fadeUp 0.3s ease both;
-  }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 2.5px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    margin: 0 auto 1.25rem;
-    animation: spin 0.8s linear infinite;
-  }
+  #loading-section { display: none; text-align: center; padding: 4rem 0; }
+  .spinner { width: 40px; height: 40px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 1.25rem; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── REPORT ── */
   #report-section { display: none; animation: fadeUp 0.4s ease both; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Employee card */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .greeting-text { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
+  .greeting-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
   .emp-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem; display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem;
   }
   .avatar {
-    width: 50px; height: 50px;
-    border-radius: 50%;
-    background: var(--accent-light);
-    color: var(--accent-text);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 16px;
-    flex-shrink: 0;
-    font-family: 'DM Mono', monospace;
+    width: 50px; height: 50px; border-radius: 50%; background: var(--accent-light); color: var(--accent-text);
+    display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px;
+    flex-shrink: 0; font-family: 'DM Mono', monospace;
   }
-  .emp-name { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+  .emp-info { display: flex; flex-direction: column; gap: 5px; }
+  .emp-name { font-size: 16px; font-weight: 600; }
+  .emp-code { font-size: 12px; font-weight: 400; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: 8px; }
   .emp-meta { font-size: 13px; color: var(--text-muted); }
-  .emp-period { font-size: 12px; color: var(--text-light); margin-top: 3px; font-family: 'DM Mono', monospace; }
-
-  /* Greeting */
-  .greeting-text {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.25rem;
+  .period-pill {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;
+    padding: 5px 13px; background: var(--accent); color: #fff; border-radius: 20px;
+    font-size: 12px; font-weight: 500; font-family: 'DM Mono', monospace; width: fit-content;
   }
-  .greeting-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.75rem; }
-
-  /* Metrics */
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 1.75rem;
-  }
-  .metric-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.1rem;
-  }
-  .metric-label { font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .period-pill svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
+  .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
   .metric-value { font-size: 26px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: -0.02em; }
   .metric-value.green { color: var(--accent); }
   .metric-value.amber { color: var(--warn); }
   .metric-value.red { color: var(--danger); }
   .metric-value.neutral { color: var(--text); }
-
-  /* Divider */
   .divider { height: 1px; background: var(--border); margin: 1.75rem 0; }
-
-  /* Section */
-  .section-label {
-    font-size: 11.5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
+  .tables-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; align-items: start; }
+  .table-panel { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
+  .table-header {
+    display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
   }
-
-  /* Row items */
-  .row-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.5rem; }
+  .table-header svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .late-header { background: var(--late-hdr); color: #fff; }
+  .missed-header { background: var(--missed-hdr); color: #fff; }
+  .table-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .late-body { background: var(--late-bg); }
+  .missed-body { background: var(--missed-bg); }
   .row-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 11px 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    gap: 1rem;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); gap: 8px;
   }
-  .row-date { font-size: 14px; font-weight: 500; }
-  .row-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
-
-  .badge {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
-    letter-spacing: 0.01em;
-    flex-shrink: 0;
-  }
+  .row-date { font-size: 13px; font-weight: 500; }
+  .row-detail { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+  .badge { font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
   .badge-green { background: var(--accent-light); color: var(--accent-text); }
   .badge-amber { background: var(--warn-light); color: var(--warn-text); }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 2rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text-muted);
-    font-size: 13.5px;
-  }
-  .empty-state svg { width: 28px; height: 28px; fill: none; stroke: var(--text-light); stroke-width: 1.8; margin-bottom: 0.5rem; }
-
-  /* Error */
-  .error-box {
-    background: var(--danger-light);
-    border: 1px solid #fca5a5;
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    font-size: 13.5px;
-    color: var(--danger-text);
-    margin-bottom: 1.5rem;
-  }
-
-  /* Footer */
-  .report-footer {
-    margin-top: 2rem;
-    padding: 1.25rem 1.5rem;
-    background: var(--surface2);
-    border-radius: var(--radius);
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
+  .empty-state { text-align: center; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); font-size: 13px; }
+  .error-box { background: var(--danger-light); border: 1px solid #fca5a5; border-radius: var(--radius); padding: 1rem 1.25rem; font-size: 13.5px; color: var(--danger-text); margin-bottom: 1.5rem; }
+  .report-footer { padding: 1rem 1.25rem; background: var(--surface2); border-radius: var(--radius); font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
   .report-footer strong { color: var(--text); }
-
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     header { padding: 1rem; }
     main { padding: 1.5rem 1rem 3rem; }
     .upload-hero h1 { font-size: 22px; }
-    .row-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .tables-grid { grid-template-columns: 1fr; }
+    .row-item { flex-direction: column; align-items: flex-start; gap: 6px; }
   }
 </style>
 </head>
@@ -321,7 +158,7 @@
   </div>
   <div>
     <div class="header-title">Attendance Analyser</div>
-    <div class="header-sub">Sanima Bank · HR Tool</div>
+    
   </div>
   <div class="header-right">
     <button class="upload-new-btn" id="upload-new-btn" style="display:none" onclick="resetApp()">
@@ -332,14 +169,11 @@
 </header>
 
 <main>
-
-  <!-- Upload Section -->
   <div id="upload-section">
     <div class="upload-hero">
       <h1>Attendance Report Analyser</h1>
       <p>Upload your daily attendance Excel export and get a<br>personalised summary of late days and missed punches.</p>
     </div>
-
     <div class="drop-zone" id="drop-zone">
       <input type="file" id="file-input" accept=".xlsx,.xls" />
       <div class="drop-icon">
@@ -348,27 +182,22 @@
       <div class="drop-title">Drop your Excel file here</div>
       <div class="drop-sub">or <span>browse to upload</span></div>
     </div>
-
     <div class="format-note">
       <strong>Expected format:</strong> Daily Attendance Report exported from the HR system with columns including
-      EmpCode, EmpName, AttendanceDate, Status, InTime, OutTime, LateByAfterGrace, MissedPunch, Designation, DepartmentName, BranchName.
+      EmpCode, EmpName, AttendanceDateNepali, Status, InTime, OutTime, LateByAfterGrace, MissedPunch, Designation, DepartmentName, BranchName.
     </div>
   </div>
 
-  <!-- Loading -->
   <div id="loading-section">
     <div class="spinner"></div>
     <div style="font-size:14px; color:var(--text-muted);">Analysing your attendance data…</div>
   </div>
 
-  <!-- Report -->
   <div id="report-section"></div>
-
 </main>
 
 <script>
 const GRACE_FREE = 5;
-const SUPERVISOR_MAX = 3;
 
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
@@ -380,14 +209,10 @@ const uploadNewBtn = document.getElementById('upload-new-btn');
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) processFile(file);
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
 });
-fileInput.addEventListener('change', e => {
-  if (e.target.files[0]) processFile(e.target.files[0]);
-});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
 
 function resetApp() {
   uploadSection.style.display = '';
@@ -401,7 +226,6 @@ function resetApp() {
 function processFile(file) {
   uploadSection.style.display = 'none';
   loadingSection.style.display = 'block';
-
   const reader = new FileReader();
   reader.onload = e => {
     try {
@@ -409,7 +233,6 @@ function processFile(file) {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-      // Find header row
       let headerRow = -1;
       for (let i = 0; i < raw.length; i++) {
         if (raw[i].includes('EmpCode') || raw[i].includes('EmpName')) { headerRow = i; break; }
@@ -418,200 +241,135 @@ function processFile(file) {
 
       const headers = raw[headerRow].map(h => String(h).trim());
       const rows = raw.slice(headerRow + 1).filter(r => r.some(c => c !== ''));
-
       const col = name => headers.indexOf(name);
       const get = (row, name) => String(row[col(name)] || '').trim();
 
-      // Validate required columns
-      const required = ['EmpName', 'EmpCode', 'Status', 'LateByAfterGrace', 'MissedPunch', 'InTime', 'OutTime', 'AttendanceDate'];
+      const required = ['EmpName', 'EmpCode', 'Status', 'LateByAfterGrace', 'MissedPunch', 'InTime'];
       const missing = required.filter(c => col(c) === -1);
-      if (missing.length) throw new Error(`Missing columns: ${missing.join(', ')}. Please check the file format.`);
+      if (missing.length) throw new Error('Missing columns: ' + missing.join(', ') + '. Please check the file format.');
 
-      // Group by employee
       const employees = {};
       rows.forEach(row => {
-        const code = get(row, 'EmpCode');
-        const name = get(row, 'EmpName');
+        const code = get(row, 'EmpCode'), name = get(row, 'EmpName');
         if (!code || !name) return;
-        const key = code;
-        if (!employees[key]) {
-          employees[key] = {
-            code, name,
-            designation: get(row, 'Designation') || '-',
-            department: get(row, 'DepartmentName') || '-',
-            branch: get(row, 'BranchName') || '-',
-            rows: []
-          };
-        }
-        employees[key].rows.push(row);
+        if (!employees[code]) employees[code] = {
+          code, name,
+          designation: get(row, 'Designation') || '-',
+          department: get(row, 'DepartmentName') || '-',
+          branch: get(row, 'BranchName') || '-',
+          rows: []
+        };
+        employees[code].rows.push(row);
       });
 
-      if (Object.keys(employees).length === 0) throw new Error('No employee data found in the file.');
+      if (!Object.keys(employees).length) throw new Error('No employee data found in the file.');
 
       loadingSection.style.display = 'none';
       reportSection.style.display = 'block';
       uploadNewBtn.style.display = '';
-
-      const allReports = Object.values(employees).map(emp => buildReport(emp, headers, col, get));
-      reportSection.innerHTML = allReports.join('');
-
+      reportSection.innerHTML = Object.values(employees).map(emp => buildReport(emp, col, get)).join('');
     } catch (err) {
       loadingSection.style.display = 'none';
       reportSection.style.display = 'block';
       uploadNewBtn.style.display = '';
-      reportSection.innerHTML = `
-        <div class="error-box">
-          <strong>Could not process file:</strong> ${err.message}
-        </div>
-        <button onclick="resetApp()" style="background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:var(--radius);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;">Try again</button>
-      `;
+      reportSection.innerHTML = '<div class="error-box"><strong>Could not process file:</strong> ' + err.message + '</div>' +
+        '<button onclick="resetApp()" style="background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:var(--radius);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;">Try again</button>';
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
-function buildReport(emp, headers, col, get) {
+function buildReport(emp, col, get) {
   const rows = emp.rows;
-
-  // Determine date range from AttendanceDateNepali only
   const nepaliDates = rows.map(r => get(r, 'AttendanceDateNepali')).filter(Boolean);
-  const nepaliFrom = nepaliDates[0] || '';
-  const nepaliTo = nepaliDates[nepaliDates.length - 1] || '';
-  const periodStr = nepaliFrom && nepaliTo ? `${nepaliFrom} – ${nepaliTo}` : 'Period not available';
+  const periodStr = nepaliDates.length >= 2
+    ? nepaliDates[0] + ' \u2013 ' + nepaliDates[nepaliDates.length - 1]
+    : nepaliDates[0] || 'Period not available';
 
-  // Filter skip statuses
   const skipPattern = /holiday|weeklyoff|weekly off|leave/i;
-  const workingRows = rows.filter(r => !skipPattern.test(get(r, 'Status')));
+  const working = rows.filter(r => !skipPattern.test(get(r, 'Status')));
+  const totalWorking = working.length;
+  const totalPresent = working.filter(r => /present/i.test(get(r, 'Status'))).length;
 
-  // Count totals
-  const totalWorking = workingRows.length;
-  const presentRows = workingRows.filter(r => /present/i.test(get(r, 'Status')));
-  const totalPresent = presentRows.length;
-
-  // Late days
-  const lateDays = workingRows.filter(r => {
+  const lateDays = working.filter(r => {
     const lb = get(r, 'LateByAfterGrace');
     return lb !== '-' && lb !== '' && lb !== '0' && lb !== '00:00';
   });
-
-  // Missed punch
-  const missedPunch = workingRows.filter(r => {
+  const missedPunch = working.filter(r => {
     const mp = get(r, 'MissedPunch');
     return mp === 'Out' || mp === 'In' || mp === '1' || mp === 'true';
   });
 
-  // Avatar initials
   const initials = emp.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
-
-
-  // Late rows HTML
-  let lateRowsHtml = '';
-  if (lateDays.length === 0) {
-    lateRowsHtml = `<div class="empty-state"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><br>No late arrivals this period</div>`;
-  } else {
-    lateDays.forEach((row, idx) => {
-      const date = get(row, 'AttendanceDate');
-      const nepali = get(row, 'AttendanceDateNepali');
-      const day = get(row, 'DayName') || '';
-      const inTime = get(row, 'InTime');
-      const lateBy = get(row, 'LateByAfterGrace');
-      const dateStr = nepali ? `${nepali} &nbsp;·&nbsp; ${date}` : date;
-
-      let badge, badgeClass;
-      if (idx < GRACE_FREE) {
-        badge = '✓ Free grace'; badgeClass = 'badge-green';
-      } else if (idx < GRACE_FREE + SUPERVISOR_MAX) {
-        badge = '⚠ Needs supervisor approval'; badgeClass = 'badge-amber';
-      } else {
-        badge = '⚠ Needs supervisor approval'; badgeClass = 'badge-amber';
-      }
-
-      lateRowsHtml += `
-        <div class="row-item">
-          <div>
-            <div class="row-date">${dateStr}${day ? ' &nbsp;·&nbsp; ' + day : ''}</div>
-            <div class="row-detail">In: ${inTime || '-'} &nbsp;·&nbsp; Late by: ${lateBy}</div>
-          </div>
-          <span class="badge ${badgeClass}">${badge}</span>
-        </div>`;
-    });
-  }
-
-  // Missed punch rows HTML
-  let missedRowsHtml = '';
-  if (missedPunch.length === 0) {
-    missedRowsHtml = `<div class="empty-state"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><br>No missed punches this period</div>`;
-  } else {
-    missedPunch.forEach(row => {
-      const date = get(row, 'AttendanceDate');
-      const nepali = get(row, 'AttendanceDateNepali');
-      const day = get(row, 'DayName') || '';
-      const inTime = get(row, 'InTime');
-      const mp = get(row, 'MissedPunch');
-      const which = mp === 'Out' ? 'Punch OUT missing' : mp === 'In' ? 'Punch IN missing' : 'Punch missing';
-      const dateStr = nepali ? `${nepali} &nbsp;·&nbsp; ${date}` : date;
-
-      missedRowsHtml += `
-        <div class="row-item">
-          <div>
-            <div class="row-date">${dateStr}${day ? ' &nbsp;·&nbsp; ' + day : ''}</div>
-            <div class="row-detail">In: ${inTime || '-'} &nbsp;·&nbsp; ${which}</div>
-          </div>
-          <span class="badge badge-amber">⚠ Needs supervisor approval</span>
-        </div>`;
-    });
-  }
-
-  // Metric colours
   const lateColor = lateDays.length === 0 ? 'green' : lateDays.length <= GRACE_FREE ? 'amber' : 'red';
   const missedColor = missedPunch.length === 0 ? 'green' : 'amber';
 
-  return `
-    <div style="margin-bottom: 3rem;">
-      <div class="greeting-text">Hello, ${emp.name}!</div>
-      <div class="greeting-sub">Your attendance report for the review period <strong>${periodStr}</strong> is summarised below.</div>
+  let lateHtml = lateDays.length === 0
+    ? '<div class="empty-state">No late arrivals this period \u2713</div>'
+    : lateDays.map((row, idx) => {
+        const nepali = get(row, 'AttendanceDateNepali');
+        const day = get(row, 'DayName');
+        const badge = idx < GRACE_FREE
+          ? '<span class="badge badge-green">\u2713 Free grace</span>'
+          : '<span class="badge badge-amber">\u26A0 Approval needed</span>';
+        return '<div class="row-item"><div>' +
+          '<div class="row-date">' + nepali + (day ? ' \u00B7 ' + day : '') + '</div>' +
+          '<div class="row-detail">In: ' + (get(row, 'InTime') || '-') + ' \u00B7 Late by: ' + get(row, 'LateByAfterGrace') + '</div>' +
+          '</div>' + badge + '</div>';
+      }).join('');
 
-      <div class="emp-card">
-        <div class="avatar">${initials}</div>
-        <div>
-          <div class="emp-name">${emp.name} <span style="font-size:12px;font-weight:400;color:var(--text-muted);font-family:'DM Mono',monospace;">${emp.code}</span></div>
-          <div class="emp-meta">${emp.designation} &nbsp;·&nbsp; ${emp.department} &nbsp;·&nbsp; ${emp.branch}</div>
-        </div>
-      </div>
+  let missedHtml = missedPunch.length === 0
+    ? '<div class="empty-state">No missed punches this period \u2713</div>'
+    : missedPunch.map(row => {
+        const nepali = get(row, 'AttendanceDateNepali');
+        const day = get(row, 'DayName');
+        const mp = get(row, 'MissedPunch');
+        const which = mp === 'Out' ? 'Punch OUT missing' : mp === 'In' ? 'Punch IN missing' : 'Punch missing';
+        return '<div class="row-item"><div>' +
+          '<div class="row-date">' + nepali + (day ? ' \u00B7 ' + day : '') + '</div>' +
+          '<div class="row-detail">In: ' + (get(row, 'InTime') || '-') + ' \u00B7 ' + which + '</div>' +
+          '</div><span class="badge badge-amber">\u26A0 Approval needed</span></div>';
+      }).join('');
 
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-label">Working days</div>
-          <div class="metric-value neutral">${totalWorking}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Days present</div>
-          <div class="metric-value green">${totalPresent}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Late arrivals</div>
-          <div class="metric-value ${lateColor}">${lateDays.length}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Missed punch</div>
-          <div class="metric-value ${missedColor}">${missedPunch.length}</div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="section-label">Late arrivals</div>
-      <div class="row-list">${lateRowsHtml}</div>
-
-      <div class="section-label">Missed punch — action required</div>
-      <div class="row-list">${missedRowsHtml}</div>
-
-      <div class="report-footer">
-        <strong>Policy reminder:</strong> First 5 late arrivals per period are within free grace. Days 6–8 require supervisor approval. Beyond 8, every 5 late days results in 0.5 day leave deduction. Each missed punch also requires supervisor approval to avoid a 0.5 day deduction.
-      </div>
-    </div>
-  `;
+  return '<div style="margin-bottom:3rem;">' +
+    '<div class="greeting-text">Hello, ' + emp.name + '!</div>' +
+    '<div class="greeting-sub">Your attendance report is summarised below.</div>' +
+    '<div class="emp-card">' +
+      '<div class="avatar">' + initials + '</div>' +
+      '<div class="emp-info">' +
+        '<div><span class="emp-name">' + emp.name + '</span><span class="emp-code">' + emp.code + '</span></div>' +
+        '<div class="emp-meta">' + emp.designation + ' \u00B7 ' + emp.department + ' \u00B7 ' + emp.branch + '</div>' +
+        '<div class="period-pill">' +
+          '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+          'Review period: ' + periodStr +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="metrics-grid">' +
+      '<div class="metric-card"><div class="metric-label">Working days</div><div class="metric-value neutral">' + totalWorking + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Days present</div><div class="metric-value green">' + totalPresent + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Late arrivals</div><div class="metric-value ' + lateColor + '">' + lateDays.length + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Missed punch</div><div class="metric-value ' + missedColor + '">' + missedPunch.length + '</div></div>' +
+    '</div>' +
+    '<div class="divider"></div>' +
+    '<div class="tables-grid">' +
+      '<div class="table-panel">' +
+        '<div class="table-header late-header">' +
+          '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+          'Late arrivals' +
+        '</div>' +
+        '<div class="table-body late-body">' + lateHtml + '</div>' +
+      '</div>' +
+      '<div class="table-panel">' +
+        '<div class="table-header missed-header">' +
+          '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+          'Missed punch \u2014 action required' +
+        '</div>' +
+        '<div class="table-body missed-body">' + missedHtml + '</div>' +
+      '</div>' +
+    '</div>' +
+    '' +
+    '</div>';
 }
 </script>
 </body>
