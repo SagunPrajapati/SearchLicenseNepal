@@ -46,11 +46,11 @@
     background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 1.25rem 2rem; display: flex; align-items: center; gap: 12px;
     position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 8px rgba(45,106,79,0.07);
   }
   .logo-mark { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
   .logo-mark svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
   .header-title { font-size: 15px; font-weight: 600; }
-  .header-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
   .header-right { margin-left: auto; }
   .upload-new-btn {
     display: flex; align-items: center; gap: 8px; padding: 8px 16px;
@@ -59,9 +59,10 @@
     transition: background 0.15s, transform 0.1s;
   }
   .upload-new-btn:hover { background: var(--accent-text); }
-  .upload-new-btn:active { transform: scale(0.98); }
   .upload-new-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+  main { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  /* ── Upload ── */
   #upload-section { animation: fadeUp 0.4s ease both; }
   .upload-hero { text-align: center; margin-bottom: 2.5rem; }
   .upload-hero h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
@@ -80,11 +81,37 @@
   .drop-sub span { color: var(--accent); font-weight: 500; }
   .format-note { margin-top: 1.5rem; padding: 0.875rem 1.25rem; background: var(--surface2); border-radius: var(--radius); font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
   .format-note strong { color: var(--text); font-weight: 500; }
+
+  /* ── Loading ── */
   #loading-section { display: none; text-align: center; padding: 4rem 0; }
   .spinner { width: 40px; height: 40px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 1.25rem; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Report ── */
   #report-section { display: none; animation: fadeUp 0.4s ease both; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Filter Bar ── */
+  .filter-bar {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem; margin-bottom: 1.75rem;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); white-space: nowrap; }
+  .filter-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px;
+    font-size: 12.5px; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; background: transparent; font-family: inherit;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .filter-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filter-chip.all-chip { background: var(--accent-light); border-color: var(--accent); color: var(--accent-text); }
+  .filter-chip.all-chip.active { background: var(--accent); color: #fff; }
+
+  /* ── Employee block ── */
+  .emp-block { margin-bottom: 3rem; }
   .greeting-text { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
   .greeting-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
   .emp-card {
@@ -106,7 +133,9 @@
     font-size: 12px; font-weight: 500; font-family: 'DM Mono', monospace; width: fit-content;
   }
   .period-pill svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
+
+  /* ── Overall metrics ── */
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
   .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
   .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
   .metric-value { font-size: 26px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: -0.02em; }
@@ -114,39 +143,78 @@
   .metric-value.amber { color: var(--warn); }
   .metric-value.red { color: var(--danger); }
   .metric-value.neutral { color: var(--text); }
-  .divider { height: 1px; background: var(--border); margin: 1.75rem 0; }
-  .tables-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; align-items: start; }
+
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+  /* ── Month section ── */
+  .month-section { margin-bottom: 1.75rem; }
+  .month-heading {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .month-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; background: var(--accent); color: #fff;
+    border-radius: 20px; font-size: 13px; font-weight: 600;
+  }
+  .month-tag svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+  .month-summary-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mpill {
+    padding: 4px 11px; border-radius: 12px; font-size: 11.5px; font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+  .mpill-green { background: var(--accent-light); color: var(--accent-text); }
+  .mpill-amber { background: var(--warn-light); color: var(--warn-text); }
+  .mpill-red  { background: var(--danger-light); color: var(--danger-text); }
+  .mpill-neutral { background: var(--surface2); color: var(--text-muted); }
+
+  .tables-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .table-panel { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
   .table-header {
-    display: flex; align-items: center; gap: 8px; padding: 12px 16px;
-    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 8px; padding: 11px 14px;
+    font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
   }
-  .table-header svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .table-header svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
   .late-header { background: var(--late-hdr); color: #fff; }
   .missed-header { background: var(--missed-hdr); color: #fff; }
-  .table-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .table-body { padding: 8px; display: flex; flex-direction: column; gap: 5px; }
   .late-body { background: var(--late-bg); }
   .missed-body { background: var(--missed-bg); }
   .row-item {
     display: flex; align-items: flex-start; justify-content: space-between;
-    padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
+    padding: 9px 11px; background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); gap: 8px;
   }
-  .row-date { font-size: 13px; font-weight: 500; }
-  .row-detail { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
-  .badge { font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+  .row-date { font-size: 12.5px; font-weight: 500; }
+  .row-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+  .badge { font-size: 10px; font-weight: 600; padding: 3px 7px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
   .badge-green { background: var(--accent-light); color: var(--accent-text); }
   .badge-amber { background: var(--warn-light); color: var(--warn-text); }
-  .empty-state { text-align: center; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); font-size: 13px; }
+  .badge-red   { background: var(--danger-light); color: var(--danger-text); }
+  .empty-state { text-align: center; padding: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); font-size: 12.5px; }
   .error-box { background: var(--danger-light); border: 1px solid #fca5a5; border-radius: var(--radius); padding: 1rem 1.25rem; font-size: 13.5px; color: var(--danger-text); margin-bottom: 1.5rem; }
-  .report-footer { padding: 1rem 1.25rem; background: var(--surface2); border-radius: var(--radius); font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
-  .report-footer strong { color: var(--text); }
+
+  /* ── Month penalty note ── */
+  .penalty-note {
+    margin-top: 10px; padding: 10px 14px;
+    background: var(--warn-light); border: 1px solid #fcd34d; border-radius: var(--radius);
+    font-size: 12px; color: var(--warn-text); line-height: 1.6;
+  }
+  .penalty-note strong { font-weight: 600; }
+
+  /* ── No data for filter ── */
+  .no-filter-data {
+    text-align: center; padding: 2rem; background: var(--surface);
+    border: 1px dashed var(--border); border-radius: var(--radius-lg);
+    color: var(--text-muted); font-size: 14px;
+  }
+
   @media (max-width: 640px) {
     header { padding: 1rem; }
     main { padding: 1.5rem 1rem 3rem; }
     .upload-hero h1 { font-size: 22px; }
     .tables-grid { grid-template-columns: 1fr; }
-    .row-item { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .row-item { flex-direction: column; align-items: flex-start; gap: 5px; }
+    .filter-bar { flex-direction: column; align-items: flex-start; }
   }
 </style>
 </head>
@@ -158,7 +226,6 @@
   </div>
   <div>
     <div class="header-title">Attendance Analyser</div>
-    
   </div>
   <div class="header-right">
     <button class="upload-new-btn" id="upload-new-btn" style="display:none" onclick="resetApp()">
@@ -169,10 +236,11 @@
 </header>
 
 <main>
+  <!-- Upload -->
   <div id="upload-section">
     <div class="upload-hero">
       <h1>Attendance Report Analyser</h1>
-      <p>Upload your daily attendance Excel export and get a<br>personalised summary of late days and missed punches.</p>
+      <p>Upload your daily attendance Excel export and get a<br>month-wise Nepali calendar summary of late days and missed punches.</p>
     </div>
     <div class="drop-zone" id="drop-zone">
       <input type="file" id="file-input" accept=".xlsx,.xls" />
@@ -183,36 +251,67 @@
       <div class="drop-sub">or <span>browse to upload</span></div>
     </div>
     <div class="format-note">
-      <strong>Expected format:</strong> Daily Attendance Report exported from the HR system with columns including
+      <strong>Expected format:</strong> Daily Attendance Report with columns:
       EmpCode, EmpName, AttendanceDateNepali, Status, InTime, OutTime, LateByAfterGrace, MissedPunch, Designation, DepartmentName, BranchName.
+      Nepali month grouping is derived from <strong>AttendanceDateNepali</strong> (e.g. 2083-01-15 → Baisakh 2083).
     </div>
   </div>
 
+  <!-- Loading -->
   <div id="loading-section">
     <div class="spinner"></div>
-    <div style="font-size:14px; color:var(--text-muted);">Analysing your attendance data…</div>
+    <div style="font-size:14px;color:var(--text-muted);">Analysing your attendance data…</div>
   </div>
 
+  <!-- Report -->
   <div id="report-section"></div>
 </main>
 
 <script>
-const GRACE_FREE = 5;
+// ── Nepali month names ─────────────────────────────────────────────────────
+var NEPALI_MONTHS = [
+  'Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin',
+  'Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'
+];
 
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-const uploadSection = document.getElementById('upload-section');
-const loadingSection = document.getElementById('loading-section');
-const reportSection = document.getElementById('report-section');
-const uploadNewBtn = document.getElementById('upload-new-btn');
+// Parse "YYYY-MM-DD" or "YYYY/MM/DD" from AttendanceDateNepali
+// Returns { year, monthIndex (0-based), day, monthKey "YYYY-MM", label "Baisakh 2083" }
+function parseNepaliDate(str) {
+  if (!str) return null;
+  var s = String(str).trim().replace(/\//g, '-');
+  var parts = s.split('-');
+  if (parts.length < 2) return null;
+  var year = parseInt(parts[0], 10);
+  var month = parseInt(parts[1], 10); // 1-based
+  var day = parts[2] ? parseInt(parts[2], 10) : 0;
+  if (isNaN(year) || isNaN(month) || month < 1 || month > 12) return null;
+  return {
+    year: year,
+    monthIndex: month - 1,
+    day: day,
+    monthKey: year + '-' + (month < 10 ? '0' + month : month),
+    label: NEPALI_MONTHS[month - 1] + ' ' + year
+  };
+}
 
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => {
+var GRACE_FREE = 5; // first N late days per month are grace-free
+var allEmployeeData = []; // store parsed data globally for filtering
+
+// ── DOM refs ───────────────────────────────────────────────────────────────
+var dropZone = document.getElementById('drop-zone');
+var fileInput = document.getElementById('file-input');
+var uploadSection = document.getElementById('upload-section');
+var loadingSection = document.getElementById('loading-section');
+var reportSection = document.getElementById('report-section');
+var uploadNewBtn = document.getElementById('upload-new-btn');
+
+dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('drag-over'); });
+dropZone.addEventListener('drop', function(e){
   e.preventDefault(); dropZone.classList.remove('drag-over');
   if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
 });
-fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+fileInput.addEventListener('change', function(e){ if (e.target.files[0]) processFile(e.target.files[0]); });
 
 function resetApp() {
   uploadSection.style.display = '';
@@ -221,39 +320,43 @@ function resetApp() {
   reportSection.innerHTML = '';
   uploadNewBtn.style.display = 'none';
   fileInput.value = '';
+  allEmployeeData = [];
 }
 
+// ── File processing ────────────────────────────────────────────────────────
 function processFile(file) {
   uploadSection.style.display = 'none';
   loadingSection.style.display = 'block';
-  const reader = new FileReader();
-  reader.onload = e => {
+  var reader = new FileReader();
+  reader.onload = function(e) {
     try {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-      let headerRow = -1;
-      for (let i = 0; i < raw.length; i++) {
-        if (raw[i].includes('EmpCode') || raw[i].includes('EmpName')) { headerRow = i; break; }
+      var headerRow = -1;
+      for (var i = 0; i < raw.length; i++) {
+        if (raw[i].indexOf('EmpCode') !== -1 || raw[i].indexOf('EmpName') !== -1) { headerRow = i; break; }
       }
-      if (headerRow === -1) throw new Error('Could not find the header row. Please ensure the file is a valid attendance report.');
+      if (headerRow === -1) throw new Error('Could not find header row. Ensure the file is a valid attendance report.');
 
-      const headers = raw[headerRow].map(h => String(h).trim());
-      const rows = raw.slice(headerRow + 1).filter(r => r.some(c => c !== ''));
-      const col = name => headers.indexOf(name);
-      const get = (row, name) => String(row[col(name)] || '').trim();
+      var headers = raw[headerRow].map(function(h){ return String(h).trim(); });
+      var rows = raw.slice(headerRow + 1).filter(function(r){ return r.some(function(c){ return c !== ''; }); });
 
-      const required = ['EmpName', 'EmpCode', 'Status', 'LateByAfterGrace', 'MissedPunch', 'InTime'];
-      const missing = required.filter(c => col(c) === -1);
-      if (missing.length) throw new Error('Missing columns: ' + missing.join(', ') + '. Please check the file format.');
+      function col(name) { return headers.indexOf(name); }
+      function get(row, name) { return String(row[col(name)] || '').trim(); }
 
-      const employees = {};
-      rows.forEach(row => {
-        const code = get(row, 'EmpCode'), name = get(row, 'EmpName');
+      var required = ['EmpName','EmpCode','Status','LateByAfterGrace','MissedPunch','InTime','AttendanceDateNepali'];
+      var missing = required.filter(function(c){ return col(c) === -1; });
+      if (missing.length) throw new Error('Missing columns: ' + missing.join(', '));
+
+      // Group by employee
+      var employees = {};
+      rows.forEach(function(row) {
+        var code = get(row, 'EmpCode'), name = get(row, 'EmpName');
         if (!code || !name) return;
         if (!employees[code]) employees[code] = {
-          code, name,
+          code: code, name: name,
           designation: get(row, 'Designation') || '-',
           department: get(row, 'DepartmentName') || '-',
           branch: get(row, 'BranchName') || '-',
@@ -262,12 +365,25 @@ function processFile(file) {
         employees[code].rows.push(row);
       });
 
-      if (!Object.keys(employees).length) throw new Error('No employee data found in the file.');
+      if (!Object.keys(employees).length) throw new Error('No employee data found.');
+
+      // Parse all employee data into month-grouped structure
+      allEmployeeData = Object.values(employees).map(function(emp) {
+        return buildEmployeeData(emp, col, get);
+      });
+
+      // Collect all unique months across all employees
+      var allMonthKeys = {};
+      allEmployeeData.forEach(function(ed) {
+        Object.keys(ed.months).forEach(function(mk) { allMonthKeys[mk] = ed.months[mk].label; });
+      });
+      var sortedMonthKeys = Object.keys(allMonthKeys).sort();
 
       loadingSection.style.display = 'none';
       reportSection.style.display = 'block';
       uploadNewBtn.style.display = '';
-      reportSection.innerHTML = Object.values(employees).map(emp => buildReport(emp, col, get)).join('');
+
+      renderReport(sortedMonthKeys, allMonthKeys, 'ALL');
     } catch (err) {
       loadingSection.style.display = 'none';
       reportSection.style.display = 'block';
@@ -279,79 +395,207 @@ function processFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
-function buildReport(emp, col, get) {
-  const rows = emp.rows;
-  const nepaliDates = rows.map(r => get(r, 'AttendanceDateNepali')).filter(Boolean);
-  const periodStr = nepaliDates.length >= 2
-    ? nepaliDates[0] + ' \u2013 ' + nepaliDates[nepaliDates.length - 1]
-    : nepaliDates[0] || 'Period not available';
+// ── Build per-employee parsed data ─────────────────────────────────────────
+function buildEmployeeData(emp, col, get) {
+  var skipPattern = /holiday|weeklyoff|weekly off|leave/i;
+  var months = {}; // monthKey -> { label, lateDays[], missedPunch[], workingDays, presentDays }
 
-  const skipPattern = /holiday|weeklyoff|weekly off|leave/i;
-  const working = rows.filter(r => !skipPattern.test(get(r, 'Status')));
-  const totalWorking = working.length;
-  const totalPresent = working.filter(r => /present/i.test(get(r, 'Status'))).length;
+  emp.rows.forEach(function(row) {
+    var status = get(row, 'Status');
+    var nepaliDateStr = get(row, 'AttendanceDateNepali');
+    var parsed = parseNepaliDate(nepaliDateStr);
+    if (!parsed) return;
 
-  const lateDays = working.filter(r => {
-    const lb = get(r, 'LateByAfterGrace');
-    return lb !== '-' && lb !== '' && lb !== '0' && lb !== '00:00';
+    var mk = parsed.monthKey;
+    if (!months[mk]) months[mk] = { label: parsed.label, lateDays: [], missedDays: [], workingDays: 0, presentDays: 0 };
+    var m = months[mk];
+
+    if (skipPattern.test(status)) return;
+    m.workingDays++;
+    if (/present/i.test(status)) m.presentDays++;
+
+    // Late
+    var lb = get(row, 'LateByAfterGrace');
+    if (lb !== '-' && lb !== '' && lb !== '0' && lb !== '00:00') {
+      m.lateDays.push({ date: nepaliDateStr, day: get(row, 'DayName'), inTime: get(row, 'InTime'), lateBy: lb });
+    }
+
+    // Missed punch
+    var mp = get(row, 'MissedPunch');
+    if (mp === 'Out' || mp === 'In' || mp === '1' || mp === 'true') {
+      m.missedDays.push({ date: nepaliDateStr, day: get(row, 'DayName'), inTime: get(row, 'InTime'), which: mp === 'Out' ? 'Punch OUT missing' : mp === 'In' ? 'Punch IN missing' : 'Punch missing' });
+    }
   });
-  const missedPunch = working.filter(r => {
-    const mp = get(r, 'MissedPunch');
-    return mp === 'Out' || mp === 'In' || mp === '1' || mp === 'true';
+
+  // Overall totals
+  var totalWorking = 0, totalPresent = 0, totalLate = 0, totalMissed = 0;
+  Object.values(months).forEach(function(m) {
+    totalWorking += m.workingDays;
+    totalPresent += m.presentDays;
+    totalLate += m.lateDays.length;
+    totalMissed += m.missedDays.length;
   });
 
-  const initials = emp.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  const lateColor = lateDays.length === 0 ? 'green' : lateDays.length <= GRACE_FREE ? 'amber' : 'red';
-  const missedColor = missedPunch.length === 0 ? 'green' : 'amber';
+  // Period
+  var allDates = emp.rows.map(function(r){ return get(r, 'AttendanceDateNepali'); }).filter(Boolean).sort();
+  var period = allDates.length >= 2 ? allDates[0] + ' \u2013 ' + allDates[allDates.length-1] : allDates[0] || 'N/A';
 
-  let lateHtml = lateDays.length === 0
-    ? '<div class="empty-state">No late arrivals this period \u2713</div>'
-    : lateDays.map((row, idx) => {
-        const nepali = get(row, 'AttendanceDateNepali');
-        const day = get(row, 'DayName');
-        const badge = idx < GRACE_FREE
-          ? '<span class="badge badge-green">\u2713 Free grace</span>'
-          : '<span class="badge badge-amber">\u26A0 Approval needed</span>';
-        return '<div class="row-item"><div>' +
-          '<div class="row-date">' + nepali + (day ? ' \u00B7 ' + day : '') + '</div>' +
-          '<div class="row-detail">In: ' + (get(row, 'InTime') || '-') + ' \u00B7 Late by: ' + get(row, 'LateByAfterGrace') + '</div>' +
-          '</div>' + badge + '</div>';
-      }).join('');
+  return {
+    code: emp.code, name: emp.name,
+    designation: emp.designation, department: emp.department, branch: emp.branch,
+    period: period, months: months,
+    totalWorking: totalWorking, totalPresent: totalPresent,
+    totalLate: totalLate, totalMissed: totalMissed
+  };
+}
 
-  let missedHtml = missedPunch.length === 0
-    ? '<div class="empty-state">No missed punches this period \u2713</div>'
-    : missedPunch.map(row => {
-        const nepali = get(row, 'AttendanceDateNepali');
-        const day = get(row, 'DayName');
-        const mp = get(row, 'MissedPunch');
-        const which = mp === 'Out' ? 'Punch OUT missing' : mp === 'In' ? 'Punch IN missing' : 'Punch missing';
-        return '<div class="row-item"><div>' +
-          '<div class="row-date">' + nepali + (day ? ' \u00B7 ' + day : '') + '</div>' +
-          '<div class="row-detail">In: ' + (get(row, 'InTime') || '-') + ' \u00B7 ' + which + '</div>' +
-          '</div><span class="badge badge-amber">\u26A0 Approval needed</span></div>';
-      }).join('');
+// ── Render report (with active filter) ────────────────────────────────────
+function renderReport(sortedMonthKeys, allMonthKeys, activeFilter) {
+  var html = '';
 
-  return '<div style="margin-bottom:3rem;">' +
-    '<div class="greeting-text">Hello, ' + emp.name + '!</div>' +
-    '<div class="greeting-sub">Your attendance report is summarised below.</div>' +
+  // Filter bar
+  html += '<div class="filter-bar">';
+  html += '<span class="filter-label">&#128197; Filter by Month</span>';
+  html += '<div class="filter-chips">';
+  html += '<button class="filter-chip all-chip' + (activeFilter === 'ALL' ? ' active' : '') + '" onclick="applyFilter(\'ALL\')" >All Months</button>';
+  sortedMonthKeys.forEach(function(mk) {
+    html += '<button class="filter-chip' + (activeFilter === mk ? ' active' : '') + '" onclick="applyFilter(\'' + mk + '\')">' + allMonthKeys[mk] + '</button>';
+  });
+  html += '</div></div>';
+
+  // Each employee
+  allEmployeeData.forEach(function(ed) {
+    html += buildEmployeeHTML(ed, activeFilter);
+  });
+
+  reportSection.innerHTML = html;
+}
+
+// ── Apply filter ───────────────────────────────────────────────────────────
+function applyFilter(monthKey) {
+  // Re-collect month keys
+  var allMonthKeys = {};
+  allEmployeeData.forEach(function(ed) {
+    Object.keys(ed.months).forEach(function(mk) { allMonthKeys[mk] = ed.months[mk].label; });
+  });
+  var sortedMonthKeys = Object.keys(allMonthKeys).sort();
+  renderReport(sortedMonthKeys, allMonthKeys, monthKey);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Build HTML for one employee ────────────────────────────────────────────
+function buildEmployeeHTML(ed, activeFilter) {
+  var initials = ed.name.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
+  var lateColor = ed.totalLate === 0 ? 'green' : ed.totalLate <= GRACE_FREE ? 'amber' : 'red';
+  var missedColor = ed.totalMissed === 0 ? 'green' : 'amber';
+
+  // Months to show
+  var monthKeys = Object.keys(ed.months).sort();
+  if (activeFilter !== 'ALL') {
+    monthKeys = monthKeys.filter(function(mk){ return mk === activeFilter; });
+  }
+
+  var monthsHTML = '';
+  if (monthKeys.length === 0) {
+    monthsHTML = '<div class="no-filter-data">No data for the selected month for this employee.</div>';
+  } else {
+    monthKeys.forEach(function(mk) {
+      monthsHTML += buildMonthHTML(ed.months[mk], mk);
+    });
+  }
+
+  return '<div class="emp-block">' +
+    '<div class="greeting-text">Hello, ' + ed.name + '!</div>' +
+    '<div class="greeting-sub">Month-wise Nepali calendar attendance summary.</div>' +
     '<div class="emp-card">' +
       '<div class="avatar">' + initials + '</div>' +
       '<div class="emp-info">' +
-        '<div><span class="emp-name">' + emp.name + '</span><span class="emp-code">' + emp.code + '</span></div>' +
-        '<div class="emp-meta">' + emp.designation + ' \u00B7 ' + emp.department + ' \u00B7 ' + emp.branch + '</div>' +
+        '<div><span class="emp-name">' + ed.name + '</span><span class="emp-code">' + ed.code + '</span></div>' +
+        '<div class="emp-meta">' + ed.designation + ' &middot; ' + ed.department + ' &middot; ' + ed.branch + '</div>' +
         '<div class="period-pill">' +
           '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-          'Review period: ' + periodStr +
+          'Review period: ' + ed.period +
         '</div>' +
       '</div>' +
     '</div>' +
-    '<div class="metrics-grid">' +
-      '<div class="metric-card"><div class="metric-label">Working days</div><div class="metric-value neutral">' + totalWorking + '</div></div>' +
-      '<div class="metric-card"><div class="metric-label">Days present</div><div class="metric-value green">' + totalPresent + '</div></div>' +
-      '<div class="metric-card"><div class="metric-label">Late arrivals</div><div class="metric-value ' + lateColor + '">' + lateDays.length + '</div></div>' +
-      '<div class="metric-card"><div class="metric-label">Missed punch</div><div class="metric-value ' + missedColor + '">' + missedPunch.length + '</div></div>' +
+
+    (activeFilter === 'ALL' ? 
+      '<div class="metrics-grid">' +
+        '<div class="metric-card"><div class="metric-label">Working days</div><div class="metric-value neutral">' + ed.totalWorking + '</div></div>' +
+        '<div class="metric-card"><div class="metric-label">Days present</div><div class="metric-value green">' + ed.totalPresent + '</div></div>' +
+        '<div class="metric-card"><div class="metric-label">Total late</div><div class="metric-value ' + lateColor + '">' + ed.totalLate + '</div></div>' +
+        '<div class="metric-card"><div class="metric-label">Missed punch</div><div class="metric-value ' + missedColor + '">' + ed.totalMissed + '</div></div>' +
+      '</div><div class="divider"></div>'
+      : '') +
+
+    monthsHTML +
+    '</div>';
+}
+
+// ── Build one Nepali month section ─────────────────────────────────────────
+function buildMonthHTML(m, mk) {
+  var lateCount = m.lateDays.length;
+  var missedCount = m.missedDays.length;
+  var penaltyDays = Math.max(0, lateCount - GRACE_FREE);
+
+  // Late rows
+  var lateHtml = '';
+  if (lateCount === 0) {
+    lateHtml = '<div class="empty-state">No late arrivals &#10003;</div>';
+  } else {
+    m.lateDays.forEach(function(d, idx) {
+      var grace = idx < GRACE_FREE;
+      var badge = grace
+        ? '<span class="badge badge-green">&#10003; Grace</span>'
+        : '<span class="badge badge-red">&#x26A0; Penalty</span>';
+      lateHtml += '<div class="row-item"><div>' +
+        '<div class="row-date">' + d.date + (d.day ? ' &middot; ' + d.day : '') + '</div>' +
+        '<div class="row-detail">In: ' + (d.inTime || '-') + ' &middot; Late by: ' + d.lateBy + '</div>' +
+        '</div>' + badge + '</div>';
+    });
+  }
+
+  // Missed rows
+  var missedHtml = '';
+  if (missedCount === 0) {
+    missedHtml = '<div class="empty-state">No missed punches &#10003;</div>';
+  } else {
+    m.missedDays.forEach(function(d) {
+      missedHtml += '<div class="row-item"><div>' +
+        '<div class="row-date">' + d.date + (d.day ? ' &middot; ' + d.day : '') + '</div>' +
+        '<div class="row-detail">In: ' + (d.inTime || '-') + ' &middot; ' + d.which + '</div>' +
+        '</div><span class="badge badge-amber">&#x26A0; Action needed</span></div>';
+    });
+  }
+
+  // Penalty note
+  var penaltyHTML = '';
+  if (penaltyDays > 0) {
+    penaltyHTML = '<div class="penalty-note">' +
+      '<strong>&#128196; Penalty note for ' + m.label + ':</strong> ' +
+      lateCount + ' late arrival' + (lateCount > 1 ? 's' : '') + ' this month. ' +
+      'First ' + GRACE_FREE + ' are grace-free. ' +
+      '<strong>' + penaltyDays + ' day' + (penaltyDays > 1 ? 's' : '') + ' require approval / may attract leave deduction.</strong>' +
+      '</div>';
+  }
+
+  // Month summary pills
+  var lPillClass = lateCount === 0 ? 'mpill-green' : lateCount <= GRACE_FREE ? 'mpill-amber' : 'mpill-red';
+  var mPillClass = missedCount === 0 ? 'mpill-green' : 'mpill-amber';
+
+  return '<div class="month-section">' +
+    '<div class="month-heading">' +
+      '<div class="month-tag">' +
+        '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+        m.label +
+      '</div>' +
+      '<div class="month-summary-pills">' +
+        '<span class="mpill mpill-neutral">' + m.workingDays + ' working days</span>' +
+        '<span class="mpill mpill-green">' + m.presentDays + ' present</span>' +
+        '<span class="mpill ' + lPillClass + '">' + lateCount + ' late</span>' +
+        '<span class="mpill ' + mPillClass + '">' + missedCount + ' missed punch</span>' +
+      '</div>' +
     '</div>' +
-    '<div class="divider"></div>' +
     '<div class="tables-grid">' +
       '<div class="table-panel">' +
         '<div class="table-header late-header">' +
@@ -363,12 +607,12 @@ function buildReport(emp, col, get) {
       '<div class="table-panel">' +
         '<div class="table-header missed-header">' +
           '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
-          'Missed punch \u2014 action required' +
+          'Missed punches' +
         '</div>' +
         '<div class="table-body missed-body">' + missedHtml + '</div>' +
       '</div>' +
     '</div>' +
-    '' +
+    penaltyHTML +
     '</div>';
 }
 </script>
