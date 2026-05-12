@@ -3,618 +3,948 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance Report Analyser</title>
+<title>Nepali Tools</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --surface: #ffffff;
-    --surface2: #e8f0eb;
-    --border: #d6e4da;
-    --text: #1a1815;
-    --text-muted: #6b7a70;
-    --text-light: #a0b0a6;
-    --accent: #2d6a4f;
-    --accent-light: #e0f0e8;
-    --accent-text: #1e4d38;
-    --warn: #b45309;
-    --warn-light: #fef3c7;
-    --warn-text: #92400e;
-    --late-bg: #f0f7f3;
-    --late-hdr: #2d6a4f;
-    --missed-bg: #fff9f0;
-    --missed-hdr: #92400e;
-    --danger: #991b1b;
-    --danger-light: #fee2e2;
-    --danger-text: #7f1d1d;
-    --radius: 10px;
-    --radius-lg: 16px;
-  }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background:
-      radial-gradient(ellipse at 0% 0%, #c8e6d4 0%, transparent 55%),
-      radial-gradient(ellipse at 100% 0%, #d4eae0 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 100%, #cde8da 0%, transparent 60%),
-      #e8f2ec;
-    background-attachment: fixed;
-    color: var(--text);
-    min-height: 100vh;
-  }
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 1.25rem 2rem; display: flex; align-items: center; gap: 12px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 1px 8px rgba(45,106,79,0.07);
-  }
-  .logo-mark { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .logo-mark svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
-  .header-title { font-size: 15px; font-weight: 600; }
-  .header-right { margin-left: auto; }
-  .upload-new-btn {
-    display: flex; align-items: center; gap: 8px; padding: 8px 16px;
-    background: var(--accent); color: #fff; border: none; border-radius: var(--radius);
-    font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .upload-new-btn:hover { background: var(--accent-text); }
-  .upload-new-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  main { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+/* ════════════════════════════════════════
+   DESIGN TOKENS — Light green theme
+════════════════════════════════════════ */
+:root {
+  /* Attendance (light green) theme */
+  --att-bg: #e8f2ec;
+  --att-bg-grad1: #c8e6d4;
+  --att-bg-grad2: #d4eae0;
+  --att-bg-grad3: #cde8da;
+  --att-surface: #ffffff;
+  --att-surface2: #e8f0eb;
+  --att-border: #d6e4da;
+  --att-text: #1a1815;
+  --att-text-muted: #6b7a70;
+  --att-accent: #2d6a4f;
+  --att-accent-light: #e0f0e8;
+  --att-accent-text: #1e4d38;
+  --att-warn: #b45309;
+  --att-warn-light: #fef3c7;
+  --att-warn-text: #92400e;
+  --att-danger: #991b1b;
+  --att-danger-light: #fee2e2;
+  --att-danger-text: #7f1d1d;
 
-  /* ── Upload ── */
-  #upload-section { animation: fadeUp 0.4s ease both; }
-  .upload-hero { text-align: center; margin-bottom: 2.5rem; }
-  .upload-hero h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
-  .upload-hero p { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
-  .drop-zone {
-    border: 1.5px dashed var(--border); border-radius: var(--radius-lg);
-    background: var(--surface); padding: 3.5rem 2rem; text-align: center;
-    cursor: pointer; position: relative; transition: border-color 0.2s, background 0.2s;
-  }
-  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: var(--accent-light); }
-  .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .drop-icon { width: 56px; height: 56px; background: var(--accent-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
-  .drop-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .drop-title { font-size: 16px; font-weight: 500; margin-bottom: 0.4rem; }
-  .drop-sub { font-size: 13px; color: var(--text-muted); }
-  .drop-sub span { color: var(--accent); font-weight: 500; }
-  .format-note { margin-top: 1.5rem; padding: 0.875rem 1.25rem; background: var(--surface2); border-radius: var(--radius); font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
-  .format-note strong { color: var(--text); font-weight: 500; }
+  /* Translator (dark) theme */
+  --tr-bg: #0f0d0b;
+  --tr-card: #1c1814;
+  --tr-card2: #231f1a;
+  --tr-border: #2e2820;
+  --tr-border2: #3d3530;
+  --tr-gold: #c9973a;
+  --tr-gold2: #e8b84b;
+  --tr-gold-dim: #7a5a1e;
+  --tr-red: #c0392b;
+  --tr-text: #f0e8dc;
+  --tr-text2: #b8a898;
+  --tr-text3: #7a6e62;
+  --tr-green: #4a9e6e;
+  --tr-green-bg: #1e3d2a;
+  --tr-warn-bg: #2a1800;
 
-  /* ── Loading ── */
-  #loading-section { display: none; text-align: center; padding: 4rem 0; }
-  .spinner { width: 40px; height: 40px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 1.25rem; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Report ── */
-  #report-section { display: none; animation: fadeUp 0.4s ease both; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+body {
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  /* Default = attendance green bg */
+  background:
+    radial-gradient(ellipse at 0% 0%, var(--att-bg-grad1) 0%, transparent 55%),
+    radial-gradient(ellipse at 100% 0%, var(--att-bg-grad2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, var(--att-bg-grad3) 0%, transparent 60%),
+    var(--att-bg);
+  background-attachment: fixed;
+  color: var(--att-text);
+  transition: background 0.3s;
+}
+body.dark-mode {
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(201,151,58,.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 100%, rgba(192,57,43,.05) 0%, transparent 45%),
+    var(--tr-bg);
+  color: var(--tr-text);
+}
 
-  /* ── Filter Bar ── */
-  .filter-bar {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 1rem 1.25rem; margin-bottom: 1.75rem;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
-  .filter-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); white-space: nowrap; }
-  .filter-chips { display: flex; gap: 7px; flex-wrap: wrap; }
-  .filter-chip {
-    padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px;
-    font-size: 12.5px; font-weight: 500; color: var(--text-muted);
-    cursor: pointer; background: transparent; font-family: inherit;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .filter-chip:hover { border-color: var(--accent); color: var(--accent); }
-  .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .filter-chip.all-chip { background: var(--accent-light); border-color: var(--accent); color: var(--accent-text); }
-  .filter-chip.all-chip.active { background: var(--accent); color: #fff; }
+/* ════ TOP HEADER ════ */
+header {
+  background: var(--att-surface);
+  border-bottom: 1px solid var(--att-border);
+  padding: 0;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 6px rgba(45,106,79,0.08);
+  transition: background 0.3s, border-color 0.3s;
+}
+body.dark-mode header {
+  background: rgba(22,19,16,0.97);
+  border-bottom-color: var(--tr-border);
+  box-shadow: none;
+}
 
-  /* ── Employee block ── */
-  .emp-block { margin-bottom: 3rem; }
-  .greeting-text { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
-  .greeting-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
-  .emp-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem; display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem;
-  }
-  .avatar {
-    width: 50px; height: 50px; border-radius: 50%; background: var(--accent-light); color: var(--accent-text);
-    display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px;
-    flex-shrink: 0; font-family: 'DM Mono', monospace;
-  }
-  .emp-info { display: flex; flex-direction: column; gap: 5px; }
-  .emp-name { font-size: 16px; font-weight: 600; }
-  .emp-code { font-size: 12px; font-weight: 400; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: 8px; }
-  .emp-meta { font-size: 13px; color: var(--text-muted); }
-  .period-pill {
-    display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;
-    padding: 5px 13px; background: var(--accent); color: #fff; border-radius: 20px;
-    font-size: 12px; font-weight: 500; font-family: 'DM Mono', monospace; width: fit-content;
-  }
-  .period-pill svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.header-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 0;
+  height: 56px;
+}
 
-  /* ── Overall metrics ── */
-  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
-  .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .metric-value { font-size: 26px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: -0.02em; }
-  .metric-value.green { color: var(--accent); }
-  .metric-value.amber { color: var(--warn); }
-  .metric-value.red { color: var(--danger); }
-  .metric-value.neutral { color: var(--text); }
+/* Logo */
+.header-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 1.5rem; height: 100%;
+  border-right: 1px solid var(--att-border);
+  flex-shrink: 0;
+}
+body.dark-mode .header-logo { border-right-color: var(--tr-border); }
+.logo-mark {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--att-accent);
+  display: flex; align-items: center; justify-content: center;
+}
+body.dark-mode .logo-mark { background: linear-gradient(135deg, var(--tr-gold), var(--tr-red)); }
+.logo-mark svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
+.logo-title { font-size: 14px; font-weight: 600; color: var(--att-text); white-space: nowrap; }
+body.dark-mode .logo-title { color: var(--tr-text); }
 
-  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+/* Nav tabs */
+.header-nav {
+  display: flex; align-items: stretch; flex: 1; height: 100%;
+  padding: 0 1rem;
+}
+.nav-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 1.1rem; height: 100%;
+  font-size: 13.5px; font-weight: 500;
+  cursor: pointer; border: none; background: transparent;
+  font-family: inherit; color: var(--att-text-muted);
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.18s; white-space: nowrap;
+  position: relative; top: 0;
+}
+.nav-tab .tab-icon { font-size: 15px; }
+.nav-tab:hover { color: var(--att-accent); }
+.nav-tab.active {
+  color: var(--att-accent);
+  border-bottom-color: var(--att-accent);
+  font-weight: 600;
+}
+body.dark-mode .nav-tab { color: var(--tr-text3); }
+body.dark-mode .nav-tab:hover { color: var(--tr-gold2); }
+body.dark-mode .nav-tab.active { color: var(--tr-gold2); border-bottom-color: var(--tr-gold2); }
 
-  /* ── Month section ── */
-  .month-section { margin-bottom: 1.75rem; }
-  .month-heading {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-  }
-  .month-tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 14px; background: var(--accent); color: #fff;
-    border-radius: 20px; font-size: 13px; font-weight: 600;
-  }
-  .month-tag svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-  .month-summary-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-  .mpill {
-    padding: 4px 11px; border-radius: 12px; font-size: 11.5px; font-weight: 500;
-    font-family: 'DM Mono', monospace;
-  }
-  .mpill-green { background: var(--accent-light); color: var(--accent-text); }
-  .mpill-amber { background: var(--warn-light); color: var(--warn-text); }
-  .mpill-red  { background: var(--danger-light); color: var(--danger-text); }
-  .mpill-neutral { background: var(--surface2); color: var(--text-muted); }
+.free-pill {
+  font-size: 10px; padding: 2px 7px; border-radius: 10px;
+  background: rgba(45,106,79,0.12); color: var(--att-accent);
+  font-family: 'DM Mono', monospace; font-weight: 500;
+}
+body.dark-mode .free-pill { background: var(--tr-green-bg); color: var(--tr-green); }
 
-  .tables-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .table-panel { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
-  .table-header {
-    display: flex; align-items: center; gap: 8px; padding: 11px 14px;
-    font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-  }
-  .table-header svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-  .late-header { background: var(--late-hdr); color: #fff; }
-  .missed-header { background: var(--missed-hdr); color: #fff; }
-  .table-body { padding: 8px; display: flex; flex-direction: column; gap: 5px; }
-  .late-body { background: var(--late-bg); }
-  .missed-body { background: var(--missed-bg); }
-  .row-item {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    padding: 9px 11px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); gap: 8px;
-  }
-  .row-date { font-size: 12.5px; font-weight: 500; }
-  .row-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
-  .badge { font-size: 10px; font-weight: 600; padding: 3px 7px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
-  .badge-green { background: var(--accent-light); color: var(--accent-text); }
-  .badge-amber { background: var(--warn-light); color: var(--warn-text); }
-  .badge-red   { background: var(--danger-light); color: var(--danger-text); }
-  .empty-state { text-align: center; padding: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); font-size: 12.5px; }
-  .error-box { background: var(--danger-light); border: 1px solid #fca5a5; border-radius: var(--radius); padding: 1rem 1.25rem; font-size: 13.5px; color: var(--danger-text); margin-bottom: 1.5rem; }
+/* Header right */
+.header-right { margin-left: auto; padding: 0 1.5rem; display: flex; align-items: center; gap: 8px; }
+.upload-new-btn {
+  display: flex; align-items: center; gap: 6px; padding: 6px 14px;
+  background: var(--att-accent); color: #fff; border: none; border-radius: var(--radius);
+  font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.15s;
+}
+.upload-new-btn:hover { background: var(--att-accent-text); }
+body.dark-mode .upload-new-btn { background: var(--tr-gold-dim); color: var(--tr-gold2); border: 1px solid var(--tr-gold-dim); }
+body.dark-mode .upload-new-btn:hover { background: var(--tr-gold); color: var(--tr-bg); }
 
-  /* ── Month penalty note ── */
-  .penalty-note {
-    margin-top: 10px; padding: 10px 14px;
-    background: var(--warn-light); border: 1px solid #fcd34d; border-radius: var(--radius);
-    font-size: 12px; color: var(--warn-text); line-height: 1.6;
-  }
-  .penalty-note strong { font-weight: 600; }
+/* ════ MAIN ════ */
+main { max-width: 920px; margin: 0 auto; padding: 2.25rem 1.5rem 4rem; }
 
-  /* ── No data for filter ── */
-  .no-filter-data {
-    text-align: center; padding: 2rem; background: var(--surface);
-    border: 1px dashed var(--border); border-radius: var(--radius-lg);
-    color: var(--text-muted); font-size: 14px;
-  }
+/* ════ APP PAGES ════ */
+.app-page { display: none; animation: fadeUp 0.35s ease both; }
+.app-page.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
 
-  @media (max-width: 640px) {
-    header { padding: 1rem; }
-    main { padding: 1.5rem 1rem 3rem; }
-    .upload-hero h1 { font-size: 22px; }
-    .tables-grid { grid-template-columns: 1fr; }
-    .row-item { flex-direction: column; align-items: flex-start; gap: 5px; }
-    .filter-bar { flex-direction: column; align-items: flex-start; }
-  }
+/* ══════════════════════════════════════════════════════
+   ATTENDANCE PAGE — Light green
+══════════════════════════════════════════════════════ */
+.att-hero { text-align: center; margin-bottom: 2.25rem; }
+.att-hero h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; margin-bottom: .4rem; color: var(--att-text); }
+.att-hero p  { font-size: 14.5px; color: var(--att-text-muted); line-height: 1.6; }
+
+.drop-zone {
+  border: 1.5px dashed var(--att-border); border-radius: var(--radius-lg);
+  background: var(--att-surface); padding: 3.25rem 2rem; text-align: center;
+  cursor: pointer; position: relative; transition: border-color .2s, background .2s;
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--att-accent); background: var(--att-accent-light); }
+.drop-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.drop-icon { width: 52px; height: 52px; background: var(--att-accent-light); border-radius: 12px; display:flex; align-items:center; justify-content:center; margin: 0 auto 1rem; }
+.drop-icon svg { width:26px; height:26px; fill:none; stroke:var(--att-accent); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.drop-title { font-size: 15px; font-weight: 500; margin-bottom: .35rem; color: var(--att-text); }
+.drop-sub   { font-size: 13px; color: var(--att-text-muted); }
+.drop-sub span { color: var(--att-accent); font-weight: 500; }
+.format-note { margin-top: 1.25rem; padding: .8rem 1.1rem; background: var(--att-surface2); border-radius: var(--radius); font-size: 12.5px; color: var(--att-text-muted); line-height: 1.6; }
+.format-note strong { color: var(--att-text); font-weight: 500; }
+
+.spinner { width:38px; height:38px; border:2.5px solid var(--att-border); border-top-color:var(--att-accent); border-radius:50%; margin:0 auto 1rem; animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* filter bar */
+.filter-bar {
+  background: var(--att-surface); border: 1px solid var(--att-border); border-radius: var(--radius-lg);
+  padding: .9rem 1.1rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.filter-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--att-text-muted); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.fchip {
+  padding: 4px 13px; border: 1px solid var(--att-border); border-radius: 20px;
+  font-size: 12px; font-weight: 500; color: var(--att-text-muted);
+  cursor: pointer; background: transparent; font-family: inherit; transition: all .15s; white-space: nowrap;
+}
+.fchip:hover { border-color: var(--att-accent); color: var(--att-accent); }
+.fchip.active { background: var(--att-accent); border-color: var(--att-accent); color: #fff; }
+.fchip.all-c  { background: var(--att-accent-light); border-color: var(--att-accent); color: var(--att-accent-text); }
+.fchip.all-c.active { background: var(--att-accent); color: #fff; }
+
+/* emp blocks */
+.emp-block { margin-bottom: 2.75rem; }
+.greeting-text { font-size: 21px; font-weight: 600; letter-spacing: -.02em; margin-bottom: .3rem; color: var(--att-text); }
+.greeting-sub  { font-size: 13px; color: var(--att-text-muted); margin-bottom: 1.25rem; }
+.emp-card {
+  background: var(--att-surface); border: 1px solid var(--att-border); border-radius: var(--radius-lg);
+  padding: 1.1rem 1.35rem; display: flex; align-items: flex-start; gap: .9rem; margin-bottom: 1.25rem;
+}
+.avatar {
+  width: 46px; height: 46px; border-radius: 50%; background: var(--att-accent-light); color: var(--att-accent-text);
+  display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px;
+  flex-shrink: 0; font-family: 'DM Mono', monospace;
+}
+.emp-info { display: flex; flex-direction: column; gap: 4px; }
+.emp-name { font-size: 15px; font-weight: 600; color: var(--att-text); }
+.emp-code { font-size: 11px; color: var(--att-text-muted); font-family: 'DM Mono', monospace; margin-left: 7px; }
+.emp-meta { font-size: 12px; color: var(--att-text-muted); }
+.period-pill {
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 2px;
+  padding: 4px 12px; background: var(--att-accent); color: #fff; border-radius: 20px;
+  font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; width: fit-content;
+}
+
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 9px; margin-bottom: 1.25rem; }
+.metric-card { background: var(--att-surface); border: 1px solid var(--att-border); border-radius: var(--radius); padding: .9rem 1rem; }
+.metric-lbl { font-size: 10px; color: var(--att-text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .05em; font-family: 'DM Mono', monospace; }
+.metric-val { font-size: 26px; font-weight: 600; font-family: 'DM Mono', monospace; }
+.metric-val.green   { color: var(--att-accent); }
+.metric-val.amber   { color: var(--att-warn); }
+.metric-val.red     { color: var(--att-danger); }
+.metric-val.neutral { color: var(--att-text); }
+
+.att-divider { height: 1px; background: var(--att-border); margin: 1.25rem 0; }
+
+.month-section { margin-bottom: 1.5rem; }
+.month-heading { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; flex-wrap: wrap; }
+.month-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 13px; background: var(--att-accent); color: #fff;
+  border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+.mpills { display: flex; gap: 6px; flex-wrap: wrap; }
+.mpill { padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.mpill-g { background: var(--att-accent-light); color: var(--att-accent-text); }
+.mpill-a { background: var(--att-warn-light); color: var(--att-warn-text); }
+.mpill-r { background: var(--att-danger-light); color: var(--att-danger-text); }
+.mpill-n { background: var(--att-surface2); color: var(--att-text-muted); }
+
+.tables-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.table-panel { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--att-border); }
+.table-hdr {
+  display: flex; align-items: center; gap: 7px; padding: 10px 13px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
+}
+.table-hdr svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+.late-hdr   { background: #2d6a4f; color: #fff; }
+.missed-hdr { background: #92400e; color: #fff; }
+.table-body { padding: 7px; display: flex; flex-direction: column; gap: 5px; }
+.late-body   { background: #f0f7f3; }
+.missed-body { background: #fff9f0; }
+.row-item {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 8px 10px; background: var(--att-surface); border: 1px solid var(--att-border);
+  border-radius: var(--radius); gap: 7px;
+}
+.row-date   { font-size: 12px; font-weight: 500; color: var(--att-text); }
+.row-detail { font-size: 10.5px; color: var(--att-text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+.badge-g { background: var(--att-accent-light); color: var(--att-accent-text); }
+.badge-a { background: var(--att-warn-light); color: var(--att-warn-text); }
+.badge-r { background: var(--att-danger-light); color: var(--att-danger-text); }
+.empty-state { text-align: center; padding: 1.1rem; background: var(--att-surface); border: 1px solid var(--att-border); border-radius: var(--radius); color: var(--att-text-muted); font-size: 12px; }
+.penalty-note { margin-top: 9px; padding: 9px 13px; background: var(--att-warn-light); border: 1px solid #fcd34d; border-radius: var(--radius); font-size: 12px; color: var(--att-warn-text); line-height: 1.6; }
+.penalty-note strong { font-weight: 600; }
+.no-filter-data { text-align: center; padding: 2rem; background: var(--att-surface); border: 1px dashed var(--att-border); border-radius: var(--radius-lg); color: var(--att-text-muted); font-size: 14px; }
+.att-error { background: var(--att-danger-light); border: 1px solid #fca5a5; border-radius: var(--radius); padding: 1rem 1.2rem; font-size: 13px; color: var(--att-danger-text); margin-bottom: 1.25rem; }
+.retry-btn { background: var(--att-accent); color:#fff; border:none; padding:9px 18px; border-radius:var(--radius); font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; }
+.retry-btn:hover { background: var(--att-accent-text); }
+
+/* ══════════════════════════════════════════════════════
+   TRANSLATOR PAGE — dark
+══════════════════════════════════════════════════════ */
+#page-translator {
+  font-family: 'DM Sans', sans-serif;
+}
+
+.mode-tabs {
+  display: flex; gap: 4px; background: var(--tr-card); border: 1px solid var(--tr-border);
+  border-radius: var(--radius-lg); padding: 5px; margin-bottom: 1.75rem;
+}
+.mode-tab {
+  flex: 1; padding: 9px 14px; border: none; border-radius: 11px;
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; transition: all .2s; color: var(--tr-text3); background: transparent;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.mode-tab.active { background: var(--tr-card2); color: var(--tr-text); border: 1px solid var(--tr-border2); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+.mode-tab:hover:not(.active) { color: var(--tr-text2); }
+
+.sub-panel { display: none; animation: fadeUp .25s ease both; }
+.sub-panel.active { display: block; }
+
+.converter-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.conv-box { background: var(--tr-card); border: 1px solid var(--tr-border); border-radius: var(--radius-lg); overflow: hidden; }
+.conv-box-hdr { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--tr-border); background: var(--tr-card2); }
+.conv-lang { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; font-family: 'DM Mono', monospace; }
+.conv-lang.en { color: var(--tr-gold2); }
+.conv-lang.ne { color: #e07060; }
+
+.icon-btn { width:27px; height:27px; border-radius:7px; border:1px solid var(--tr-border2); background:transparent; color:var(--tr-text3); cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.icon-btn:hover { background:var(--tr-border2); color:var(--tr-text); }
+.icon-btn.copied { background:var(--tr-green-bg); color:var(--tr-green); border-color:var(--tr-green); }
+
+textarea { width:100%; min-height:190px; padding:14px; background:transparent; border:none; outline:none; resize:vertical; font-family:'DM Sans',sans-serif; font-size:17px; color:var(--tr-text); line-height:1.6; }
+textarea::placeholder { color:var(--tr-text3); font-style:italic; }
+
+.out-area { min-height:190px; padding:14px; font-size:19px; line-height:1.7; color:var(--tr-text); }
+.out-area.deva { font-family:'Noto Sans Devanagari','Mangal',Arial Unicode MS,sans-serif; }
+.out-area.ph   { color:var(--tr-text3); font-family:'DM Sans',sans-serif; font-style:italic; font-size:14px; }
+.out-preeti { padding:9px 14px; border-top:1px solid var(--tr-border); font-size:14px; color:var(--tr-gold); font-family:Preeti,monospace; background:rgba(201,151,58,.04); }
+.out-preeti-lbl { font-size:10px; color:var(--tr-text3); text-transform:uppercase; letter-spacing:.08em; font-family:'DM Mono',monospace; margin-bottom:3px; }
+
+.convert-btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:12px; margin-top:12px; background:linear-gradient(135deg,var(--tr-gold),#a07020); border:none; border-radius:var(--radius); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; color:#0f0d0b; transition:all .2s; }
+.convert-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
+
+.word-results { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.word-chip { padding:4px 10px; background:var(--tr-card); border:1px solid var(--tr-border); border-radius:8px; }
+.word-chip .w-en { color:var(--tr-text3); font-family:'DM Mono',monospace; font-size:10px; }
+.word-chip .w-ne { color:var(--tr-text); font-family:'Noto Sans Devanagari',serif; font-size:14px; }
+.word-chip.nf { opacity:.45; }
+
+.translit-hint { margin-top:12px; padding:10px 14px; background:var(--tr-card2); border:1px solid var(--tr-border); border-radius:var(--radius); font-size:12px; color:var(--tr-text3); line-height:1.7; }
+.translit-hint strong { color:var(--tr-text2); }
+.hint-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:3px 14px; margin-top:5px; font-family:'DM Mono',monospace; font-size:11px; }
+.hint-item span { color:var(--tr-gold); }
+
+/* number */
+.num-wrap { max-width:540px; margin:0 auto; }
+.num-box { background:var(--tr-card); border:1px solid var(--tr-border); border-radius:var(--radius-lg); padding:18px; margin-bottom:12px; }
+.n-lbl { font-size:10px; color:var(--tr-text3); text-transform:uppercase; letter-spacing:.1em; font-family:'DM Mono',monospace; margin-bottom:9px; }
+#numberInput { width:100%; padding:13px; font-size:32px; background:var(--tr-card2); border:1px solid var(--tr-border2); border-radius:var(--radius); color:var(--tr-text); font-family:'DM Mono',monospace; text-align:center; outline:none; -moz-appearance:textfield; transition:border-color .2s; }
+#numberInput:focus { border-color:var(--tr-gold-dim); box-shadow:0 0 0 3px rgba(201,151,58,.1); }
+#numberInput::-webkit-inner-spin-button,#numberInput::-webkit-outer-spin-button{-webkit-appearance:none;}
+.cur-row { display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
+.cur-btn { padding:6px 14px; border:1px solid var(--tr-border2); border-radius:20px; background:transparent; color:var(--tr-text3); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; transition:all .15s; }
+.cur-btn.active { background:var(--tr-gold-dim); border-color:var(--tr-gold); color:var(--tr-gold2); }
+.ex-nums { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; align-items:center; }
+.ex-num { padding:4px 12px; border:1px solid var(--tr-border2); border-radius:20px; font-size:12px; color:var(--tr-text3); cursor:pointer; background:transparent; font-family:'DM Mono',monospace; transition:all .15s; }
+.ex-num:hover { border-color:var(--tr-gold-dim); color:var(--tr-gold2); }
+.num-res { background:var(--tr-card); border:1px solid var(--tr-border); border-radius:var(--radius-lg); overflow:hidden; }
+.num-row { padding:14px 17px; border-bottom:1px solid var(--tr-border); }
+.num-row:last-child { border-bottom:none; }
+.nv { font-size:22px; line-height:1.5; color:var(--tr-text); font-family:'Noto Sans Devanagari',serif; }
+.nv.preeti-v { font-family:Preeti,monospace; color:var(--tr-gold2); font-size:19px; }
+.nv.ph { color:var(--tr-text3); font-family:'DM Sans',sans-serif; font-style:italic; font-size:14px; }
+.cp-row { display:flex; gap:7px; padding:10px 17px; background:var(--tr-card2); }
+.cp-btn { padding:5px 13px; border:1px solid var(--tr-border2); border-radius:8px; background:transparent; color:var(--tr-text3); cursor:pointer; font-size:11px; font-family:'DM Mono',monospace; transition:all .15s; }
+.cp-btn:hover { background:var(--tr-border2); color:var(--tr-text); }
+.cp-btn.copied { background:var(--tr-green-bg); color:var(--tr-green); border-color:var(--tr-green); }
+
+/* ════ MOBILE ════ */
+@media (max-width:640px) {
+  main { padding:1.25rem 1rem 5rem; }
+  .converter-wrap { grid-template-columns:1fr; }
+  .tables-grid { grid-template-columns:1fr; }
+  .filter-bar { flex-direction:column; align-items:flex-start; }
+  .metrics-grid { grid-template-columns:repeat(2,1fr); }
+  .header-inner { padding: 0 .5rem; }
+  .header-logo { padding: 0 .75rem; }
+  .nav-tab { padding: 0 .6rem; font-size: 12px; }
+}
 </style>
 </head>
 <body>
 
+<!-- ═══════════ HEADER ═══════════ -->
 <header>
-  <div class="logo-mark">
-    <svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="11" x2="13" y2="11"/><line x1="7" y1="14" x2="10" y2="14"/></svg>
-  </div>
-  <div>
-    <div class="header-title">Attendance Analyser</div>
-  </div>
-  <div class="header-right">
-    <button class="upload-new-btn" id="upload-new-btn" style="display:none" onclick="resetApp()">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Upload new file
-    </button>
+  <div class="header-inner">
+    <div class="header-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="11" x2="13" y2="11"/><line x1="7" y1="14" x2="10" y2="14"/></svg>
+      </div>
+      <span class="logo-title">Nepali Tools</span>
+    </div>
+
+    <nav class="header-nav">
+      <button class="nav-tab active" id="nav-attendance" onclick="switchApp('attendance')">
+        <span class="tab-icon">📋</span> Attendance
+      </button>
+      <button class="nav-tab" id="nav-translator" onclick="switchApp('translator')">
+        <span class="tab-icon">🌐</span> Translator
+        <span class="free-pill">Free</span>
+      </button>
+    </nav>
+
+    <div class="header-right">
+      <button class="upload-new-btn" id="att-new-btn" style="display:none" onclick="resetAttendance()">
+        ↑ New file
+      </button>
+    </div>
   </div>
 </header>
 
+<!-- ═══════════ MAIN ═══════════ -->
 <main>
-  <!-- Upload -->
-  <div id="upload-section">
-    <div class="upload-hero">
-      <h1>Attendance Report Analyser</h1>
-      <p>Upload your daily attendance Excel export and get a<br>month-wise Nepali calendar summary of late days and missed punches.</p>
-    </div>
-    <div class="drop-zone" id="drop-zone">
-      <input type="file" id="file-input" accept=".xlsx,.xls" />
-      <div class="drop-icon">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+
+  <!-- ══════════ ATTENDANCE PAGE ══════════ -->
+  <div class="app-page active" id="page-attendance">
+
+    <div id="att-upload">
+      <div class="att-hero">
+        <h1>Attendance Report Analyser</h1>
+        <p>Upload your daily attendance Excel export and get a<br>month-wise Nepali calendar summary of late days and missed punches.</p>
       </div>
-      <div class="drop-title">Drop your Excel file here</div>
-      <div class="drop-sub">or <span>browse to upload</span></div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="attFile" accept=".xlsx,.xls"/>
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </div>
+        <div class="drop-title">Drop your Excel file here</div>
+        <div class="drop-sub">or <span>browse to upload</span></div>
+      </div>
+      <div class="format-note">
+        <strong>Expected format:</strong> Daily Attendance Report with columns:
+        EmpCode, EmpName, AttendanceDateNepali, Status, InTime, OutTime, LateByAfterGrace, MissedPunch, Designation, DepartmentName, BranchName.
+        Nepali month grouping is derived from <strong>AttendanceDateNepali</strong> (e.g. 2083-01-15 → Baisakh 2083).
+      </div>
     </div>
-    <div class="format-note">
-      <strong>Expected format:</strong> Daily Attendance Report with columns:
-      EmpCode, EmpName, AttendanceDateNepali, Status, InTime, OutTime, LateByAfterGrace, MissedPunch, Designation, DepartmentName, BranchName.
-      Nepali month grouping is derived from <strong>AttendanceDateNepali</strong> (e.g. 2083-01-15 → Baisakh 2083).
+
+    <div id="att-loading" style="display:none; text-align:center; padding:4rem 0;">
+      <div class="spinner"></div>
+      <div style="font-size:14px; color:var(--att-text-muted);">Analysing attendance data…</div>
     </div>
+
+    <div id="att-report" style="display:none;"></div>
   </div>
 
-  <!-- Loading -->
-  <div id="loading-section">
-    <div class="spinner"></div>
-    <div style="font-size:14px;color:var(--text-muted);">Analysing your attendance data…</div>
-  </div>
+  <!-- ══════════ TRANSLATOR PAGE ══════════ -->
+  <div class="app-page" id="page-translator">
 
-  <!-- Report -->
-  <div id="report-section"></div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchSub('translate')" id="stab-translate">🌐 Translation</button>
+      <button class="mode-tab" onclick="switchSub('translit')" id="stab-translit">⌨️ Transliteration</button>
+      <button class="mode-tab" onclick="switchSub('number')" id="stab-number">🔢 Number to Words</button>
+    </div>
+
+    <!-- Translation -->
+    <div class="sub-panel active" id="sp-translate">
+      <div class="converter-wrap">
+        <div class="conv-box">
+          <div class="conv-box-hdr"><span class="conv-lang en">English</span><button class="icon-btn" onclick="clearTrans()">✕</button></div>
+          <textarea id="transIn" placeholder="Type English words or sentences…&#10;&#10;e.g. Hello, how are you? I am fine."></textarea>
+        </div>
+        <div class="conv-box">
+          <div class="conv-box-hdr"><span class="conv-lang ne">नेपाली</span><button class="icon-btn" id="cpTrans" onclick="cpEl('transOut','cpTrans')">⎘</button></div>
+          <div id="transOut" class="out-area ph">Translation will appear here…</div>
+          <div id="transPreetiBox" class="out-preeti" style="display:none"><div class="out-preeti-lbl">Preeti Encoded</div><div id="transPreetiTxt"></div></div>
+        </div>
+      </div>
+      <button class="convert-btn" onclick="doTranslate()">🌐 Translate to Nepali &nbsp;·&nbsp; <small style="opacity:.7">Ctrl+Enter</small></button>
+      <div id="wordBD" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- Transliteration -->
+    <div class="sub-panel" id="sp-translit">
+      <div class="converter-wrap">
+        <div class="conv-box">
+          <div class="conv-box-hdr"><span class="conv-lang en">Roman Nepali</span><button class="icon-btn" onclick="clearTranslit()">✕</button></div>
+          <textarea id="translitIn" placeholder="namaste, tapaai lai kasto cha?" oninput="doTranslit()"></textarea>
+        </div>
+        <div class="conv-box">
+          <div class="conv-box-hdr"><span class="conv-lang ne">देवनागरी</span><button class="icon-btn" id="cpTranslit" onclick="cpEl('translitOut','cpTranslit')">⎘</button></div>
+          <div id="translitOut" class="out-area ph">Devanagari appears as you type…</div>
+          <div id="translitPreetiBox" class="out-preeti" style="display:none"><div class="out-preeti-lbl">Preeti Encoded</div><div id="translitPreetiTxt"></div></div>
+        </div>
+      </div>
+      <div class="translit-hint">
+        <strong>Typing guide:</strong>
+        <div class="hint-grid">
+          <span class="hint-item">namaste → <span>नमस्ते</span></span>
+          <span class="hint-item">nepal → <span>नेपाल</span></span>
+          <span class="hint-item">kathmandu → <span>काठमाण्डु</span></span>
+          <span class="hint-item">dhanyabad → <span>धन्यवाद</span></span>
+          <span class="hint-item">ramro → <span>राम्रो</span></span>
+          <span class="hint-item">paani → <span>पानी</span></span>
+          <span class="hint-item">kasto cha → <span>कस्तो छ</span></span>
+          <span class="hint-item">ghar → <span>घर</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Number -->
+    <div class="sub-panel" id="sp-number">
+      <div class="num-wrap">
+        <div class="num-box">
+          <div class="n-lbl">Enter Number</div>
+          <input type="number" id="numberInput" placeholder="e.g. 1500" min="0"/>
+          <div class="cur-row">
+            <button class="cur-btn active" id="cur-rupees" onclick="setCur('rupees')">रुपैयाँ (Rupees)</button>
+            <button class="cur-btn" id="cur-paisa" onclick="setCur('paisa')">पैसा (Paisa)</button>
+            <button class="cur-btn" id="cur-none" onclick="setCur('none')">Words only</button>
+          </div>
+          <div class="ex-nums">
+            <span class="n-lbl" style="margin:0;line-height:2.2">Try:</span>
+            <button class="ex-num" onclick="setNum(1)">1</button>
+            <button class="ex-num" onclick="setNum(25)">25</button>
+            <button class="ex-num" onclick="setNum(100)">100</button>
+            <button class="ex-num" onclick="setNum(1500)">1,500</button>
+            <button class="ex-num" onclick="setNum(50000)">50,000</button>
+            <button class="ex-num" onclick="setNum(100000)">1,00,000</button>
+            <button class="ex-num" onclick="setNum(2500000)">25,00,000</button>
+          </div>
+        </div>
+        <div class="num-res">
+          <div class="num-row"><div class="n-lbl">Nepali Words (Unicode)</div><div id="numU" class="nv ph">Enter a number above…</div></div>
+          <div class="num-row"><div class="n-lbl">Preeti Font</div><div id="numP" class="nv ph" style="font-size:14px">Preeti output will appear here…</div></div>
+          <div class="cp-row">
+            <button class="cp-btn" id="cnU" onclick="cpEl('numU','cnU')">Copy Unicode</button>
+            <button class="cp-btn" id="cnP" onclick="cpEl('numP','cnP')">Copy Preeti</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-translator -->
 </main>
 
 <script>
-// ── Nepali month names ─────────────────────────────────────────────────────
-var NEPALI_MONTHS = [
-  'Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin',
-  'Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'
+// ═══════════════════════════════════════════
+//  APP SWITCH
+// ═══════════════════════════════════════════
+var currentApp = 'attendance';
+function switchApp(name) {
+  currentApp = name;
+  document.querySelectorAll('.app-page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  // Theme switch
+  if (name === 'translator') {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
+  document.getElementById('att-new-btn').style.display = (name === 'attendance' && attHasReport) ? '' : 'none';
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════
+//  TRANSLATOR SUB-TABS
+// ═══════════════════════════════════════════
+function switchSub(name) {
+  document.querySelectorAll('.sub-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.mode-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('sp-' + name).classList.add('active');
+  document.getElementById('stab-' + name).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  DICTIONARY
+// ═══════════════════════════════════════════
+var DICT = {
+  "hello":"नमस्ते","hi":"नमस्ते","goodbye":"बिदाई","bye":"बिदाई",
+  "good":"राम्रो","bad":"नराम्रो","yes":"हो","no":"होइन","ok":"ठीक छ","okay":"ठीक छ",
+  "please":"कृपया","thank":"धन्यवाद","thanks":"धन्यवाद","sorry":"माफ गर्नुहोस्","welcome":"स्वागत",
+  "how":"कसरी","what":"के","where":"कहाँ","when":"कहिले","why":"किन","who":"को","which":"कुन",
+  "are":"छ","is":"छ","am":"छु","was":"थियो","were":"थिए","have":"छ","has":"छ","had":"थियो",
+  "do":"गर्छ","does":"गर्छ","did":"गर्यो","will":"गर्नेछ","can":"सक्छ","should":"गर्नुपर्छ",
+  "not":"छैन","very":"धेरै","also":"पनि","and":"र","or":"वा","but":"तर","so":"त्यसैले",
+  "the":"","a":"","an":"","of":"को","in":"मा","at":"मा","to":"लाई","for":"को लागि",
+  "with":"सँगै","from":"बाट","by":"द्वारा","on":"मा","about":"बारे",
+  "this":"यो","that":"त्यो","here":"यहाँ","there":"त्यहाँ",
+  "i":"म","me":"मलाई","my":"मेरो","we":"हामी","our":"हाम्रो",
+  "you":"तपाई","your":"तपाईको","he":"उ","his":"उसको","she":"उ","her":"उसलाई",
+  "they":"उनीहरू","their":"उनीहरूको",
+  "man":"मान्छे","woman":"महिला","boy":"केटो","girl":"केटी","child":"बच्चा",
+  "father":"बुबा","mother":"आमा","brother":"दाजु","sister":"दिदी","son":"छोरा","daughter":"छोरी",
+  "husband":"श्रीमान","wife":"श्रीमती","friend":"साथी","family":"परिवार",
+  "go":"जानु","come":"आउनु","eat":"खानु","drink":"पिउनु","sleep":"सुत्नु","walk":"हिँड्नु",
+  "run":"दौडनु","see":"देख्नु","look":"हेर्नु","hear":"सुन्नु","speak":"बोल्नु","say":"भन्नु",
+  "know":"थाहा छ","think":"सोच्नु","understand":"बुझ्नु","learn":"सिक्नु","teach":"सिकाउनु",
+  "read":"पढ्नु","write":"लेख्नु","work":"काम गर्नु","play":"खेल्नु","help":"मद्दत गर्नु",
+  "give":"दिनु","take":"लिनु","get":"पाउनु","make":"बनाउनु","buy":"किन्नु","sell":"बेच्नु",
+  "want":"चाहनु","need":"चाहिनु","like":"मन पर्नु","love":"माया गर्नु","hate":"घृणा गर्नु",
+  "live":"बस्नु","find":"खोज्नु","send":"पठाउनु","meet":"भेट्नु","pay":"तिर्नु","wait":"पर्खनु",
+  "remember":"सम्झनु","forget":"बिर्सनु","feel":"महसुस गर्नु","call":"बोलाउनु",
+  "big":"ठूलो","small":"सानो","long":"लामो","short":"छोटो","tall":"अग्लो",
+  "old":"पुरानो","new":"नयाँ","young":"जवान","fast":"छिटो","slow":"ढिलो",
+  "hot":"तातो","cold":"चिसो","warm":"न्यानो","clean":"सफा","dirty":"फोहोर",
+  "hard":"कडा","soft":"नरम","heavy":"गह्रौं","light":"हल्का",
+  "strong":"बलियो","weak":"कमजोर","rich":"धनी","poor":"गरिब",
+  "happy":"खुशी","sad":"दुखी","beautiful":"सुन्दर","smart":"चतुर","brave":"साहसी",
+  "free":"स्वतन्त्र","busy":"व्यस्त","easy":"सजिलो","difficult":"गाह्रो",
+  "true":"सत्य","false":"झूठो","right":"सही","wrong":"गलत",
+  "important":"महत्त्वपूर्ण","special":"विशेष","simple":"सरल",
+  "many":"धेरै","much":"धेरै","few":"थोरै","some":"केही","all":"सबै","every":"प्रत्येक",
+  "first":"पहिलो","last":"अन्तिम","next":"अर्को","ready":"तयार","full":"भरिएको","empty":"खाली",
+  "zero":"शून्य","one":"एक","two":"दुई","three":"तीन","four":"चार","five":"पाँच",
+  "six":"छ","seven":"सात","eight":"आठ","nine":"नौ","ten":"दश",
+  "hundred":"सय","thousand":"हजार","lakh":"लाख","crore":"करोड",
+  "time":"समय","today":"आज","yesterday":"हिजो","tomorrow":"भोलि",
+  "now":"अहिले","always":"सधैं","never":"कहिल्यै",
+  "day":"दिन","night":"रात","morning":"बिहान","afternoon":"दिउँसो","evening":"साँझ",
+  "week":"हप्ता","month":"महिना","year":"वर्ष","hour":"घण्टा","minute":"मिनेट",
+  "nepal":"नेपाल","kathmandu":"काठमाण्डौ","india":"भारत","world":"संसार",
+  "country":"देश","city":"शहर","village":"गाउँ","home":"घर","house":"घर",
+  "school":"विद्यालय","hospital":"अस्पताल","office":"कार्यालय","market":"बजार",
+  "water":"पानी","fire":"आगो","air":"हावा","sky":"आकाश","sun":"सूर्य","moon":"चन्द्रमा",
+  "rain":"वर्षा","snow":"हिउँ","tree":"रुख","flower":"फूल",
+  "food":"खाना","rice":"भात","bread":"रोटी","milk":"दूध","tea":"चिया","coffee":"कफी",
+  "sugar":"चिनी","salt":"नुन","egg":"अण्डा","meat":"मासु","fish":"माछा",
+  "vegetable":"तरकारी","fruit":"फलफूल","apple":"स्याउ","banana":"केरा","potato":"आलु",
+  "head":"टाउको","eye":"आँखा","ear":"कान","nose":"नाक","mouth":"मुख","hand":"हात",
+  "leg":"खुट्टा","body":"शरीर","heart":"मुटु","blood":"रगत",
+  "money":"पैसा","price":"मूल्य","bank":"बैंक","government":"सरकार",
+  "doctor":"डाक्टर","teacher":"शिक्षक","student":"विद्यार्थी","book":"किताब",
+  "pen":"कलम","paper":"कागज","phone":"फोन","computer":"कम्प्युटर",
+  "car":"गाडी","bus":"बस","bridge":"पुल",
+  "fine":"ठीक छु","well":"राम्रोसँग","sick":"बिरामी","tired":"थकित","hungry":"भोकाएको",
+  "name":"नाम","age":"उमेर","number":"नम्बर",
+  "more":"थप","less":"कम","enough":"पुग्यो","again":"फेरि","alone":"एक्लै",
+  "slowly":"बिस्तारै","quickly":"छिटो","maybe":"सायद","only":"मात्र","still":"अझै",
+};
+var PHRASES = [
+  ["how are you","तपाईलाई कस्तो छ?"],["i am fine","म ठीक छु"],["i am good","म राम्रो छु"],
+  ["thank you","धन्यवाद"],["good morning","शुभ प्रभात"],["good afternoon","शुभ दिउँसो"],
+  ["good evening","शुभ साँझ"],["good night","शुभ रात्री"],["see you later","पछि भेटौंला"],
+  ["what is your name","तपाईको नाम के हो?"],["my name is","मेरो नाम हो"],
+  ["where are you from","तपाई कहाँबाट हो?"],["i love you","म तिमीलाई माया गर्छु"],
+  ["i miss you","म तिमीलाई याद गर्छु"],["how much","कति पर्छ"],
+  ["no problem","कुनै समस्या छैन"],["of course","निश्चय रूपमा"],
+  ["i don't know","मलाई थाहा छैन"],["i understand","मैले बुझें"],
+  ["i don't understand","मैले बुझिनँ"],["please help me","कृपया मलाई मद्दत गर्नुहोस्"],
+  ["what time is it","अहिले कति बजेको छ?"],
 ];
 
-// Parse "YYYY-MM-DD" or "YYYY/MM/DD" from AttendanceDateNepali
-// Returns { year, monthIndex (0-based), day, monthKey "YYYY-MM", label "Baisakh 2083" }
-function parseNepaliDate(str) {
-  if (!str) return null;
-  var s = String(str).trim().replace(/\//g, '-');
-  var parts = s.split('-');
-  if (parts.length < 2) return null;
-  var year = parseInt(parts[0], 10);
-  var month = parseInt(parts[1], 10); // 1-based
-  var day = parts[2] ? parseInt(parts[2], 10) : 0;
-  if (isNaN(year) || isNaN(month) || month < 1 || month > 12) return null;
-  return {
-    year: year,
-    monthIndex: month - 1,
-    day: day,
-    monthKey: year + '-' + (month < 10 ? '0' + month : month),
-    label: NEPALI_MONTHS[month - 1] + ' ' + year
-  };
+function doTranslate() {
+  var input = document.getElementById('transIn').value.trim();
+  var outEl = document.getElementById('transOut');
+  var bdEl  = document.getElementById('wordBD');
+  var prBox = document.getElementById('transPreetiBox');
+  var prTxt = document.getElementById('transPreetiTxt');
+  if (!input) { outEl.className='out-area ph'; outEl.textContent='Translation will appear here…'; bdEl.innerHTML=''; prBox.style.display='none'; return; }
+  var lower = input.toLowerCase().replace(/[^a-z0-9\s']/g,' ').replace(/\s+/g,' ').trim();
+  var words = lower.split(' '); var translated=[]; var breakdown=[]; var i=0;
+  while (i < words.length) {
+    var w = words[i].replace(/[^a-z]/g,''); if (!w) { i++; continue; }
+    var tri=(words[i]||'')+' '+(words[i+1]||'')+' '+(words[i+2]||'');
+    var bi=(words[i]||'')+' '+(words[i+1]||'');
+    var pm=null;
+    for (var pp=0; pp<PHRASES.length; pp++) {
+      if (PHRASES[pp][0]===tri.trim()) { pm={ne:PHRASES[pp][1],skip:3}; break; }
+      if (PHRASES[pp][0]===bi.trim())  { pm={ne:PHRASES[pp][1],skip:2}; break; }
+    }
+    if (pm) { translated.push(pm.ne); breakdown.push({en:words.slice(i,i+pm.skip).join(' '),ne:pm.ne,found:true}); i+=pm.skip; }
+    else if (DICT[w]!==undefined) { if(DICT[w]) translated.push(DICT[w]); breakdown.push({en:w,ne:DICT[w]||'',found:true}); i++; }
+    else { translated.push(w); breakdown.push({en:w,ne:w,found:false}); i++; }
+  }
+  var sentence = translated.filter(Boolean).join(' ');
+  outEl.className='out-area deva'; outEl.textContent=sentence;
+  prTxt.textContent=u2p(sentence); prBox.style.display='block';
+  var chips = breakdown.map(function(b){
+    if (!b.found) return '<div class="word-chip nf"><div class="w-en">'+b.en+'</div><div class="w-ne" style="font-size:11px;color:var(--tr-text3)">(not found)</div></div>';
+    if (!b.ne) return '';
+    return '<div class="word-chip"><div class="w-en">'+b.en+'</div><div class="w-ne">'+b.ne+'</div></div>';
+  }).join('');
+  bdEl.innerHTML='<div style="font-size:10px;color:var(--tr-text3);font-family:\'DM Mono\',monospace;margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">Word breakdown</div><div class="word-results">'+chips+'</div>';
+}
+function clearTrans(){
+  document.getElementById('transIn').value='';
+  var o=document.getElementById('transOut'); o.className='out-area ph'; o.textContent='Translation will appear here…';
+  document.getElementById('wordBD').innerHTML=''; document.getElementById('transPreetiBox').style.display='none';
 }
 
-var GRACE_FREE = 5; // first N late days per month are grace-free
-var allEmployeeData = []; // store parsed data globally for filtering
-
-// ── DOM refs ───────────────────────────────────────────────────────────────
-var dropZone = document.getElementById('drop-zone');
-var fileInput = document.getElementById('file-input');
-var uploadSection = document.getElementById('upload-section');
-var loadingSection = document.getElementById('loading-section');
-var reportSection = document.getElementById('report-section');
-var uploadNewBtn = document.getElementById('upload-new-btn');
-
-dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('drag-over'); });
-dropZone.addEventListener('drop', function(e){
-  e.preventDefault(); dropZone.classList.remove('drag-over');
-  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', function(e){ if (e.target.files[0]) processFile(e.target.files[0]); });
-
-function resetApp() {
-  uploadSection.style.display = '';
-  loadingSection.style.display = 'none';
-  reportSection.style.display = 'none';
-  reportSection.innerHTML = '';
-  uploadNewBtn.style.display = 'none';
-  fileInput.value = '';
-  allEmployeeData = [];
-}
-
-// ── File processing ────────────────────────────────────────────────────────
-function processFile(file) {
-  uploadSection.style.display = 'none';
-  loadingSection.style.display = 'block';
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var wb = XLSX.read(e.target.result, { type: 'array' });
-      var ws = wb.Sheets[wb.SheetNames[0]];
-      var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-
-      var headerRow = -1;
-      for (var i = 0; i < raw.length; i++) {
-        if (raw[i].indexOf('EmpCode') !== -1 || raw[i].indexOf('EmpName') !== -1) { headerRow = i; break; }
+// ═══ TRANSLITERATION ═══
+var TMAP=[['ksh','क्ष'],['gya','ज्ञ'],['jnya','ज्ञ'],['chh','छ'],['shh','ष'],
+  ['ch','च'],['sh','श'],['ph','फ'],['bh','भ'],['dh','ध'],['Dh','ढ'],
+  ['gh','घ'],['jh','झ'],['kh','ख'],['th','थ'],['Th','ठ'],['nh','ञ'],['ng','ङ'],
+  ['aa','आ'],['ii','ई'],['uu','ऊ'],['ee','ई'],['oo','ऊ'],['ai','ऐ'],['au','औ'],
+  ['A','आ'],['I','ई'],['U','ऊ'],['E','ए'],['O','ओ'],
+  ['a','अ'],['i','इ'],['u','उ'],['e','ए'],['o','ओ'],
+  ['k','क'],['g','ग'],['c','क'],['j','ज'],['z','ज'],
+  ['t','त'],['T','ट'],['d','द'],['D','ड'],
+  ['n','न'],['N','ण'],['m','म'],['p','प'],['b','ब'],['f','फ'],['v','व'],['w','व'],
+  ['r','र'],['l','ल'],['s','स'],['h','ह'],['y','य'],['q','क'],['x','क्स'],
+  ['0','०'],['1','१'],['2','२'],['3','३'],['4','४'],['5','५'],['6','६'],['7','७'],['8','८'],['9','९']];
+var VOWELS=new Set(['अ','आ','इ','ई','उ','ऊ','ए','ऐ','ओ','औ']);
+var CONS=new Set(['क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह']);
+var DIAC={'अ':'','आ':'ा','इ':'ि','ई':'ी','उ':'ु','ऊ':'ू','ए':'े','ऐ':'ै','ओ':'ो','औ':'ौ'};
+function r2d(text){
+  var res='',i=0,pc='';
+  while(i<text.length){
+    var ch=text[i];
+    if(ch===' '||ch==='\n'){if(pc){res+=pc+'अ';pc='';}res+=ch;i++;continue;}
+    if(/[^a-zA-Z0-9]/.test(ch)){if(pc){res+=pc+'अ';pc='';}res+=ch;i++;continue;}
+    var matched=false;
+    for(var ri=0;ri<TMAP.length;ri++){
+      var fr=TMAP[ri][0],to=TMAP[ri][1];
+      if(text.substr(i,fr.length)===fr){
+        var isV=VOWELS.has(to),isC=CONS.has(to)||to==='क्ष'||to==='ज्ञ';
+        if(isC){if(pc)res+=pc+'्';pc=to;}
+        else if(isV){if(pc){var d=DIAC[to];res+=to==='अ'?pc:(pc+d);pc='';}else res+=to;}
+        else{if(pc){res+=pc+'अ';pc='';}res+=to;}
+        i+=fr.length;matched=true;break;
       }
-      if (headerRow === -1) throw new Error('Could not find header row. Ensure the file is a valid attendance report.');
+    }
+    if(!matched){if(pc){res+=pc+'अ';pc='';}res+=ch;i++;}
+  }
+  if(pc)res+=pc+'अ';
+  return res;
+}
+function doTranslit(){
+  var inp=document.getElementById('translitIn').value;
+  var out=document.getElementById('translitOut'),pb=document.getElementById('translitPreetiBox'),pt=document.getElementById('translitPreetiTxt');
+  if(!inp.trim()){out.className='out-area ph';out.textContent='Devanagari appears as you type…';pb.style.display='none';return;}
+  var res=r2d(inp);out.className='out-area deva';out.textContent=res;pt.textContent=u2p(res);pb.style.display='block';
+}
+function clearTranslit(){
+  document.getElementById('translitIn').value='';
+  var o=document.getElementById('translitOut');o.className='out-area ph';o.textContent='Devanagari appears as you type…';
+  document.getElementById('translitPreetiBox').style.display='none';
+}
 
-      var headers = raw[headerRow].map(function(h){ return String(h).trim(); });
-      var rows = raw.slice(headerRow + 1).filter(function(r){ return r.some(function(c){ return c !== ''; }); });
+// ═══ NUMBER ═══
+var OU=['','एक','दुई','तीन','चार','पाँच','छ','सात','आठ','नौ','दश','एघार','बाह्र','तेह्र','चौध','पन्ध्र','सोह्र','सत्र','अठार','उन्नाइस','बीस','एक्काइस','बाइस','तेइस','चौबीस','पच्चीस','छब्बीस','सत्ताइस','अठ्ठाइस','उनन्तीस','तीस','एकतीस','बत्तीस','तेत्तीस','चौतीस','पैंतीस','छत्तीस','सैंतीस','अठतीस','उनचालीस','चालीस','एकचालीस','बयालीस','त्रियालीस','चवालीस','पैंतालीस','छयालीस','सतचालीस','अठचालीस','उनपचास','पचास','एकाउन्न','बाउन्न','त्रिपन्न','चौपन्न','पचपन्न','छपन्न','सन्ताउन्न','अठाउन्न','उनसठी','साठी','एकसठी','बासठी','त्रिसठी','चौसठी','पैंसठी','छैसठी','सत्सठी','अठसठी','उनसत्तरी','सत्तरी','एकहत्तर','बहत्तर','त्रिहत्तर','चौहत्तर','पचहत्तर','छहत्तर','सतहत्तर','अठहत्तर','उनासी','असी','एकासी','बयासी','त्र्यासी','चौरासी','पचासी','छयासी','सतासी','अठासी','उनान्नब्बे','नब्बे','एकानब्बे','बयानब्बे','त्रियानब्बे','चौरानब्बे','पन्चानब्बे','छयानब्बे','सन्तानब्बे','अठानब्बे','उनन्सय'];
+var OP=['','Ps',"b'O",'tLg','rf/','kfFr','5','xft','cf7','gf}','bz','P3f/','afXb','tXb','rf}w','kGb','xf]Xb','xb','c7f/','pgfOx','aLx','PsfOx','afOx','tPOx','rf}aLx','kRrLx','5AaLx','xQfOx','c7AaLx','pgGtLx','tLx','PstLx','aQtLx','tPQtLx','rf}tLx','k}FtLx','5QrLx','x}FtLx','c7tLx','pgrf/Lx','rf/Lx','PsrfnLx','aofnLx','l8ofnLx','rjfnLx','k}FtfnLx','5ofnLx','xrfnLx','c7rfnLx','pgkrfx','krfx','Psf}Gg','af}Gg','l8kGg','rf}kGg','krkGg','5kGg','xGtf}Gg','c7f}Gg','pgx7L','xf7L','Psx7L','afx7L','l8x7L','rf}x7L','k}Fx7L','5}x7L','xrx7L','c7x7L','pgxQrL','xQrL','Ps]Qr','a]Qr','l8]Qr','rf}]Qr','kr]Qr','5]Qr','xr]Qr','c7]Qr','pgfxL','cxL','PsfxL','aofxL','l8ofxL','rf}]fxL','krfxL','5ofxL','xrfxL','c7fxL','pgfGA]','GAA]','PsfGA]','aofGA]','l8ofGA]','rf}]fGA]','kGrfGA]','5ofGA]','xGtfGA]','c7fGA]','pgGxy'];
+var numCur='rupees',numLU='',numLP='';
+function setCur(c){numCur=c;document.querySelectorAll('.cur-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('cur-'+c).classList.add('active');renderNum();}
+function setNum(n){document.getElementById('numberInput').value=n;renderNum();}
+function toNW(n){
+  if(n===0)return{u:'शून्य',p:'zGo'};
+  var u=[],p=[];
+  function a(v,us,ps){if(v>0){u.push(OU[v]+us);p.push(OP[v]+ps);}}
+  a(Math.floor(n/1000000000),' अरब',' c/a');n%=1000000000;
+  a(Math.floor(n/10000000),' करोड',' s/f]8');n%=10000000;
+  a(Math.floor(n/100000),' लाख',' nfv');n%=100000;
+  a(Math.floor(n/1000),' हजार',' xhf/');n%=1000;
+  a(Math.floor(n/100),' सय',' xo');n%=100;
+  if(n>0){u.push(OU[n]);p.push(OP[n]);}
+  return{u:u.join(' '),p:p.join(' ')};
+}
+function renderNum(){
+  var val=document.getElementById('numberInput').value;
+  var uE=document.getElementById('numU'),pE=document.getElementById('numP');
+  if(val===''){uE.className='nv ph';uE.textContent='Enter a number above…';pE.className='nv ph';pE.style.fontSize='14px';pE.textContent='Preeti output will appear here…';return;}
+  var num=parseInt(val,10);
+  if(isNaN(num)||num<0||num>9999999999){uE.className='nv ph';uE.textContent='Valid range: 0–999,99,99,999';return;}
+  var r=toNW(num);numLU=r.u;numLP=r.p;
+  if(numCur==='rupees'){numLU+=' रुपैयाँ';numLP+=' ?kof+';}
+  else if(numCur==='paisa'){numLU+=' पैसा';numLP+=' k}xf';}
+  uE.className='nv';uE.textContent=numLU;
+  pE.className='nv preeti-v';pE.style.fontSize='';pE.textContent=numLP;
+}
+function u2p(t){
+  var m={'अ':'c','आ':'cf','इ':'O','ई':'O{','उ':'p','ऊ':'pm','ए':'P','ऐ':'P{','ओ':'cf]','औ':'cf}','क':'s','ख':'v','ग':'u','घ':'3','ङ':'Ë','च':'r','छ':'5','ज':'h','झ':'em','ञ':'~','ट':'6','ठ':'7','ड':'8','ढ':'9','ण':'+','त':'t','थ':'y','द':'b','ध':'w','न':'g','प':'k','फ':'km','ब':'a','भ':'e','म':'d','य':'o','र':'/','ल':'n','व':'j','श':'z','ष':'{','स':'x','ह':'x','ा':'f','ि':'L','ी':'Lf','ु':'p','ू':'pm','े':']','ै':'}{','ो':'f]','ौ':'f}','्':'\\','ं':'+','ः':' M','०':')','१':'!','२':'@','३':'#','४':'$','५':'%','६':'^','७':'&','८':'*','९':'(','।':' .'};
+  var o='';for(var i=0;i<t.length;i++)o+=m[t[i]]!==undefined?m[t[i]]:t[i];return o;
+}
+function cpEl(id,btnId){
+  var text=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=document.getElementById(btnId),orig=btn.textContent;
+    btn.textContent='✓';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent=orig;btn.classList.remove('copied');},2000);
+  });
+}
 
-      function col(name) { return headers.indexOf(name); }
-      function get(row, name) { return String(row[col(name)] || '').trim(); }
+// ═══════════════════════════════════════════
+//  ATTENDANCE ANALYSER
+// ═══════════════════════════════════════════
+var NM=['Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin','Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'];
+var GRACE=5;
+var allEmpData=[];
+var attHasReport=false;
 
-      var required = ['EmpName','EmpCode','Status','LateByAfterGrace','MissedPunch','InTime','AttendanceDateNepali'];
-      var missing = required.filter(function(c){ return col(c) === -1; });
-      if (missing.length) throw new Error('Missing columns: ' + missing.join(', '));
+function parseND(s){
+  if(!s)return null;
+  var p=String(s).trim().replace(/\//g,'-').split('-');
+  if(p.length<2)return null;
+  var yr=parseInt(p[0],10),mo=parseInt(p[1],10),dy=p[2]?parseInt(p[2],10):0;
+  if(isNaN(yr)||isNaN(mo)||mo<1||mo>12)return null;
+  return{year:yr,mi:mo-1,day:dy,mk:yr+'-'+(mo<10?'0'+mo:mo),label:NM[mo-1]+' '+yr};
+}
 
-      // Group by employee
-      var employees = {};
-      rows.forEach(function(row) {
-        var code = get(row, 'EmpCode'), name = get(row, 'EmpName');
-        if (!code || !name) return;
-        if (!employees[code]) employees[code] = {
-          code: code, name: name,
-          designation: get(row, 'Designation') || '-',
-          department: get(row, 'DepartmentName') || '-',
-          branch: get(row, 'BranchName') || '-',
-          rows: []
-        };
-        employees[code].rows.push(row);
+var dz=document.getElementById('dropZone');
+var fi=document.getElementById('attFile');
+dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave',function(){dz.classList.remove('drag-over');});
+dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);});
+fi.addEventListener('change',function(e){if(e.target.files[0])processFile(e.target.files[0]);});
+
+function resetAttendance(){
+  document.getElementById('att-upload').style.display='';
+  document.getElementById('att-loading').style.display='none';
+  document.getElementById('att-report').style.display='none';
+  document.getElementById('att-report').innerHTML='';
+  document.getElementById('att-new-btn').style.display='none';
+  fi.value='';allEmpData=[];attHasReport=false;
+}
+
+function processFile(file){
+  document.getElementById('att-upload').style.display='none';
+  document.getElementById('att-loading').style.display='block';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(e.target.result,{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      var hr=-1;
+      for(var i=0;i<raw.length;i++){if(raw[i].indexOf('EmpCode')!==-1||raw[i].indexOf('EmpName')!==-1){hr=i;break;}}
+      if(hr===-1)throw new Error('Header row not found.');
+      var headers=raw[hr].map(function(h){return String(h).trim();});
+      var rows=raw.slice(hr+1).filter(function(r){return r.some(function(c){return c!=='';});});
+      function col(n){return headers.indexOf(n);}
+      function get(row,n){return String(row[col(n)]||'').trim();}
+      var req=['EmpName','EmpCode','Status','LateByAfterGrace','MissedPunch','InTime','AttendanceDateNepali'];
+      var miss=req.filter(function(c){return col(c)===-1;});
+      if(miss.length)throw new Error('Missing columns: '+miss.join(', '));
+      var emps={};
+      rows.forEach(function(row){
+        var code=get(row,'EmpCode'),name=get(row,'EmpName');
+        if(!code||!name)return;
+        if(!emps[code])emps[code]={code:code,name:name,designation:get(row,'Designation')||'-',department:get(row,'DepartmentName')||'-',branch:get(row,'BranchName')||'-',rows:[]};
+        emps[code].rows.push(row);
       });
-
-      if (!Object.keys(employees).length) throw new Error('No employee data found.');
-
-      // Parse all employee data into month-grouped structure
-      allEmployeeData = Object.values(employees).map(function(emp) {
-        return buildEmployeeData(emp, col, get);
-      });
-
-      // Collect all unique months across all employees
-      var allMonthKeys = {};
-      allEmployeeData.forEach(function(ed) {
-        Object.keys(ed.months).forEach(function(mk) { allMonthKeys[mk] = ed.months[mk].label; });
-      });
-      var sortedMonthKeys = Object.keys(allMonthKeys).sort();
-
-      loadingSection.style.display = 'none';
-      reportSection.style.display = 'block';
-      uploadNewBtn.style.display = '';
-
-      renderReport(sortedMonthKeys, allMonthKeys, 'ALL');
-    } catch (err) {
-      loadingSection.style.display = 'none';
-      reportSection.style.display = 'block';
-      uploadNewBtn.style.display = '';
-      reportSection.innerHTML = '<div class="error-box"><strong>Could not process file:</strong> ' + err.message + '</div>' +
-        '<button onclick="resetApp()" style="background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:var(--radius);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;">Try again</button>';
+      if(!Object.keys(emps).length)throw new Error('No employee data found.');
+      allEmpData=Object.values(emps).map(function(emp){return buildEmpData(emp,col,get);});
+      var allMK={};
+      allEmpData.forEach(function(ed){Object.keys(ed.months).forEach(function(mk){allMK[mk]=ed.months[mk].label;});});
+      document.getElementById('att-loading').style.display='none';
+      document.getElementById('att-report').style.display='block';
+      document.getElementById('att-new-btn').style.display='';
+      attHasReport=true;
+      renderAtt(Object.keys(allMK).sort(),allMK,'ALL');
+    }catch(err){
+      document.getElementById('att-loading').style.display='none';
+      document.getElementById('att-report').style.display='block';
+      document.getElementById('att-new-btn').style.display='';
+      document.getElementById('att-report').innerHTML='<div class="att-error"><strong>Could not process file:</strong> '+err.message+'</div><button class="retry-btn" onclick="resetAttendance()">Try again</button>';
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
-// ── Build per-employee parsed data ─────────────────────────────────────────
-function buildEmployeeData(emp, col, get) {
-  var skipPattern = /holiday|weeklyoff|weekly off|leave/i;
-  var months = {}; // monthKey -> { label, lateDays[], missedPunch[], workingDays, presentDays }
-
-  emp.rows.forEach(function(row) {
-    var status = get(row, 'Status');
-    var nepaliDateStr = get(row, 'AttendanceDateNepali');
-    var parsed = parseNepaliDate(nepaliDateStr);
-    if (!parsed) return;
-
-    var mk = parsed.monthKey;
-    if (!months[mk]) months[mk] = { label: parsed.label, lateDays: [], missedDays: [], workingDays: 0, presentDays: 0 };
-    var m = months[mk];
-
-    if (skipPattern.test(status)) return;
+function buildEmpData(emp,col,get){
+  var skip=/holiday|weeklyoff|weekly off|leave/i,months={};
+  emp.rows.forEach(function(row){
+    var status=get(row,'Status'),nd=parseND(get(row,'AttendanceDateNepali'));
+    if(!nd)return;
+    if(!months[nd.mk])months[nd.mk]={label:nd.label,lateDays:[],missedDays:[],workingDays:0,presentDays:0};
+    var m=months[nd.mk];
+    if(skip.test(status))return;
     m.workingDays++;
-    if (/present/i.test(status)) m.presentDays++;
-
-    // Late
-    var lb = get(row, 'LateByAfterGrace');
-    if (lb !== '-' && lb !== '' && lb !== '0' && lb !== '00:00') {
-      m.lateDays.push({ date: nepaliDateStr, day: get(row, 'DayName'), inTime: get(row, 'InTime'), lateBy: lb });
-    }
-
-    // Missed punch
-    var mp = get(row, 'MissedPunch');
-    if (mp === 'Out' || mp === 'In' || mp === '1' || mp === 'true') {
-      m.missedDays.push({ date: nepaliDateStr, day: get(row, 'DayName'), inTime: get(row, 'InTime'), which: mp === 'Out' ? 'Punch OUT missing' : mp === 'In' ? 'Punch IN missing' : 'Punch missing' });
-    }
+    if(/present/i.test(status))m.presentDays++;
+    var lb=get(row,'LateByAfterGrace');
+    if(lb!=='-'&&lb!==''&&lb!=='0'&&lb!=='00:00')m.lateDays.push({date:get(row,'AttendanceDateNepali'),day:get(row,'DayName'),inTime:get(row,'InTime'),lateBy:lb});
+    var mp=get(row,'MissedPunch');
+    if(mp==='Out'||mp==='In'||mp==='1'||mp==='true')m.missedDays.push({date:get(row,'AttendanceDateNepali'),day:get(row,'DayName'),inTime:get(row,'InTime'),which:mp==='Out'?'Punch OUT missing':mp==='In'?'Punch IN missing':'Punch missing'});
   });
-
-  // Overall totals
-  var totalWorking = 0, totalPresent = 0, totalLate = 0, totalMissed = 0;
-  Object.values(months).forEach(function(m) {
-    totalWorking += m.workingDays;
-    totalPresent += m.presentDays;
-    totalLate += m.lateDays.length;
-    totalMissed += m.missedDays.length;
-  });
-
-  // Period
-  var allDates = emp.rows.map(function(r){ return get(r, 'AttendanceDateNepali'); }).filter(Boolean).sort();
-  var period = allDates.length >= 2 ? allDates[0] + ' \u2013 ' + allDates[allDates.length-1] : allDates[0] || 'N/A';
-
-  return {
-    code: emp.code, name: emp.name,
-    designation: emp.designation, department: emp.department, branch: emp.branch,
-    period: period, months: months,
-    totalWorking: totalWorking, totalPresent: totalPresent,
-    totalLate: totalLate, totalMissed: totalMissed
-  };
+  var tW=0,tP=0,tL=0,tM=0;
+  Object.values(months).forEach(function(m){tW+=m.workingDays;tP+=m.presentDays;tL+=m.lateDays.length;tM+=m.missedDays.length;});
+  var dates=[];
+  emp.rows.forEach(function(row){var d=get(row,'AttendanceDateNepali');if(d)dates.push(d);});
+  dates.sort();
+  var period=dates.length>=2?dates[0]+' – '+dates[dates.length-1]:(dates[0]||'N/A');
+  return{code:emp.code,name:emp.name,designation:emp.designation,department:emp.department,branch:emp.branch,period:period,months:months,tW:tW,tP:tP,tL:tL,tM:tM};
 }
 
-// ── Render report (with active filter) ────────────────────────────────────
-function renderReport(sortedMonthKeys, allMonthKeys, activeFilter) {
-  var html = '';
-
-  // Filter bar
-  html += '<div class="filter-bar">';
-  html += '<span class="filter-label">&#128197; Filter by Month</span>';
-  html += '<div class="filter-chips">';
-  html += '<button class="filter-chip all-chip' + (activeFilter === 'ALL' ? ' active' : '') + '" onclick="applyFilter(\'ALL\')" >All Months</button>';
-  sortedMonthKeys.forEach(function(mk) {
-    html += '<button class="filter-chip' + (activeFilter === mk ? ' active' : '') + '" onclick="applyFilter(\'' + mk + '\')">' + allMonthKeys[mk] + '</button>';
-  });
-  html += '</div></div>';
-
-  // Each employee
-  allEmployeeData.forEach(function(ed) {
-    html += buildEmployeeHTML(ed, activeFilter);
-  });
-
-  reportSection.innerHTML = html;
+function renderAtt(sMK,allMK,active){
+  var html='<div class="filter-bar"><span class="filter-lbl">📅 Filter by Month</span><div class="filter-chips">';
+  html+='<button class="fchip all-c'+(active==='ALL'?' active':'')+'" onclick="applyFilter(\'ALL\')">All Months</button>';
+  sMK.forEach(function(mk){html+='<button class="fchip'+(active===mk?' active':'')+'" onclick="applyFilter(\''+mk+'\')">'+allMK[mk]+'</button>';});
+  html+='</div></div>';
+  allEmpData.forEach(function(ed){html+=buildEmpHTML(ed,active);});
+  document.getElementById('att-report').innerHTML=html;
 }
 
-// ── Apply filter ───────────────────────────────────────────────────────────
-function applyFilter(monthKey) {
-  // Re-collect month keys
-  var allMonthKeys = {};
-  allEmployeeData.forEach(function(ed) {
-    Object.keys(ed.months).forEach(function(mk) { allMonthKeys[mk] = ed.months[mk].label; });
-  });
-  var sortedMonthKeys = Object.keys(allMonthKeys).sort();
-  renderReport(sortedMonthKeys, allMonthKeys, monthKey);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function applyFilter(mk){
+  var allMK={};allEmpData.forEach(function(ed){Object.keys(ed.months).forEach(function(k){allMK[k]=ed.months[k].label;});});
+  renderAtt(Object.keys(allMK).sort(),allMK,mk);
+  document.getElementById('att-report').scrollIntoView({behavior:'smooth'});
 }
 
-// ── Build HTML for one employee ────────────────────────────────────────────
-function buildEmployeeHTML(ed, activeFilter) {
-  var initials = ed.name.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
-  var lateColor = ed.totalLate === 0 ? 'green' : ed.totalLate <= GRACE_FREE ? 'amber' : 'red';
-  var missedColor = ed.totalMissed === 0 ? 'green' : 'amber';
-
-  // Months to show
-  var monthKeys = Object.keys(ed.months).sort();
-  if (activeFilter !== 'ALL') {
-    monthKeys = monthKeys.filter(function(mk){ return mk === activeFilter; });
-  }
-
-  var monthsHTML = '';
-  if (monthKeys.length === 0) {
-    monthsHTML = '<div class="no-filter-data">No data for the selected month for this employee.</div>';
-  } else {
-    monthKeys.forEach(function(mk) {
-      monthsHTML += buildMonthHTML(ed.months[mk], mk);
-    });
-  }
-
-  return '<div class="emp-block">' +
-    '<div class="greeting-text">Hello, ' + ed.name + '!</div>' +
-    '<div class="greeting-sub">Month-wise Nepali calendar attendance summary.</div>' +
-    '<div class="emp-card">' +
-      '<div class="avatar">' + initials + '</div>' +
-      '<div class="emp-info">' +
-        '<div><span class="emp-name">' + ed.name + '</span><span class="emp-code">' + ed.code + '</span></div>' +
-        '<div class="emp-meta">' + ed.designation + ' &middot; ' + ed.department + ' &middot; ' + ed.branch + '</div>' +
-        '<div class="period-pill">' +
-          '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-          'Review period: ' + ed.period +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-
-    (activeFilter === 'ALL' ? 
-      '<div class="metrics-grid">' +
-        '<div class="metric-card"><div class="metric-label">Working days</div><div class="metric-value neutral">' + ed.totalWorking + '</div></div>' +
-        '<div class="metric-card"><div class="metric-label">Days present</div><div class="metric-value green">' + ed.totalPresent + '</div></div>' +
-        '<div class="metric-card"><div class="metric-label">Total late</div><div class="metric-value ' + lateColor + '">' + ed.totalLate + '</div></div>' +
-        '<div class="metric-card"><div class="metric-label">Missed punch</div><div class="metric-value ' + missedColor + '">' + ed.totalMissed + '</div></div>' +
-      '</div><div class="divider"></div>'
-      : '') +
-
-    monthsHTML +
-    '</div>';
+function buildEmpHTML(ed,active){
+  var ini=ed.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  var lc=ed.tL===0?'green':ed.tL<=GRACE?'amber':'red';
+  var mc=ed.tM===0?'green':'amber';
+  var mks=Object.keys(ed.months).sort();
+  if(active!=='ALL')mks=mks.filter(function(mk){return mk===active;});
+  var mHTML=mks.length===0?'<div class="no-filter-data">No data for the selected month.</div>':mks.map(function(mk){return buildMonthHTML(ed.months[mk]);}).join('');
+  var overall=active==='ALL'?
+    '<div class="metrics-grid">'+
+    '<div class="metric-card"><div class="metric-lbl">Working days</div><div class="metric-val neutral">'+ed.tW+'</div></div>'+
+    '<div class="metric-card"><div class="metric-lbl">Days present</div><div class="metric-val green">'+ed.tP+'</div></div>'+
+    '<div class="metric-card"><div class="metric-lbl">Total late</div><div class="metric-val '+lc+'">'+ed.tL+'</div></div>'+
+    '<div class="metric-card"><div class="metric-lbl">Missed punch</div><div class="metric-val '+mc+'">'+ed.tM+'</div></div>'+
+    '</div><div class="att-divider"></div>':'';
+  return '<div class="emp-block">'+
+    '<div class="greeting-text">Hello, '+ed.name+'!</div>'+
+    '<div class="greeting-sub">Month-wise Nepali calendar attendance summary.</div>'+
+    '<div class="emp-card">'+
+    '<div class="avatar">'+ini+'</div>'+
+    '<div class="emp-info">'+
+    '<div><span class="emp-name">'+ed.name+'</span><span class="emp-code">'+ed.code+'</span></div>'+
+    '<div class="emp-meta">'+ed.designation+' · '+ed.department+' · '+ed.branch+'</div>'+
+    '<div class="period-pill">📅 '+ed.period+'</div>'+
+    '</div></div>'+overall+mHTML+'</div>';
 }
 
-// ── Build one Nepali month section ─────────────────────────────────────────
-function buildMonthHTML(m, mk) {
-  var lateCount = m.lateDays.length;
-  var missedCount = m.missedDays.length;
-  var penaltyDays = Math.max(0, lateCount - GRACE_FREE);
-
-  // Late rows
-  var lateHtml = '';
-  if (lateCount === 0) {
-    lateHtml = '<div class="empty-state">No late arrivals &#10003;</div>';
-  } else {
-    m.lateDays.forEach(function(d, idx) {
-      var grace = idx < GRACE_FREE;
-      var badge = grace
-        ? '<span class="badge badge-green">&#10003; Grace</span>'
-        : '<span class="badge badge-red">&#x26A0; Penalty</span>';
-      lateHtml += '<div class="row-item"><div>' +
-        '<div class="row-date">' + d.date + (d.day ? ' &middot; ' + d.day : '') + '</div>' +
-        '<div class="row-detail">In: ' + (d.inTime || '-') + ' &middot; Late by: ' + d.lateBy + '</div>' +
-        '</div>' + badge + '</div>';
-    });
-  }
-
-  // Missed rows
-  var missedHtml = '';
-  if (missedCount === 0) {
-    missedHtml = '<div class="empty-state">No missed punches &#10003;</div>';
-  } else {
-    m.missedDays.forEach(function(d) {
-      missedHtml += '<div class="row-item"><div>' +
-        '<div class="row-date">' + d.date + (d.day ? ' &middot; ' + d.day : '') + '</div>' +
-        '<div class="row-detail">In: ' + (d.inTime || '-') + ' &middot; ' + d.which + '</div>' +
-        '</div><span class="badge badge-amber">&#x26A0; Action needed</span></div>';
-    });
-  }
-
-  // Penalty note
-  var penaltyHTML = '';
-  if (penaltyDays > 0) {
-    penaltyHTML = '<div class="penalty-note">' +
-      '<strong>&#128196; Penalty note for ' + m.label + ':</strong> ' +
-      lateCount + ' late arrival' + (lateCount > 1 ? 's' : '') + ' this month. ' +
-      'First ' + GRACE_FREE + ' are grace-free. ' +
-      '<strong>' + penaltyDays + ' day' + (penaltyDays > 1 ? 's' : '') + ' require approval / may attract leave deduction.</strong>' +
-      '</div>';
-  }
-
-  // Month summary pills
-  var lPillClass = lateCount === 0 ? 'mpill-green' : lateCount <= GRACE_FREE ? 'mpill-amber' : 'mpill-red';
-  var mPillClass = missedCount === 0 ? 'mpill-green' : 'mpill-amber';
-
-  return '<div class="month-section">' +
-    '<div class="month-heading">' +
-      '<div class="month-tag">' +
-        '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-        m.label +
-      '</div>' +
-      '<div class="month-summary-pills">' +
-        '<span class="mpill mpill-neutral">' + m.workingDays + ' working days</span>' +
-        '<span class="mpill mpill-green">' + m.presentDays + ' present</span>' +
-        '<span class="mpill ' + lPillClass + '">' + lateCount + ' late</span>' +
-        '<span class="mpill ' + mPillClass + '">' + missedCount + ' missed punch</span>' +
-      '</div>' +
-    '</div>' +
-    '<div class="tables-grid">' +
-      '<div class="table-panel">' +
-        '<div class="table-header late-header">' +
-          '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-          'Late arrivals' +
-        '</div>' +
-        '<div class="table-body late-body">' + lateHtml + '</div>' +
-      '</div>' +
-      '<div class="table-panel">' +
-        '<div class="table-header missed-header">' +
-          '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
-          'Missed punches' +
-        '</div>' +
-        '<div class="table-body missed-body">' + missedHtml + '</div>' +
-      '</div>' +
-    '</div>' +
-    penaltyHTML +
-    '</div>';
+function buildMonthHTML(m){
+  var lc=m.lateDays.length,mc=m.missedDays.length,pd=Math.max(0,lc-GRACE);
+  var lHTML=lc===0?'<div class="empty-state">No late arrivals ✓</div>':m.lateDays.map(function(d,idx){
+    var b=idx<GRACE?'<span class="badge badge-g">✓ Grace</span>':'<span class="badge badge-r">⚠ Penalty</span>';
+    return '<div class="row-item"><div><div class="row-date">'+d.date+(d.day?' · '+d.day:'')+'</div><div class="row-detail">In: '+(d.inTime||'-')+' · Late by: '+d.lateBy+'</div></div>'+b+'</div>';
+  }).join('');
+  var mHTML=mc===0?'<div class="empty-state">No missed punches ✓</div>':m.missedDays.map(function(d){
+    return '<div class="row-item"><div><div class="row-date">'+d.date+(d.day?' · '+d.day:'')+'</div><div class="row-detail">In: '+(d.inTime||'-')+' · '+d.which+'</div></div><span class="badge badge-a">⚠ Action</span></div>';
+  }).join('');
+  var pen=pd>0?'<div class="penalty-note"><strong>📄 Penalty note for '+m.label+':</strong> '+lc+' late arrival'+(lc>1?'s':'')+' this month. First '+GRACE+' are grace-free. <strong>'+pd+' day'+(pd>1?'s':'')+' require approval.</strong></div>':'';
+  var lpc=lc===0?'mpill-g':lc<=GRACE?'mpill-a':'mpill-r',mpc=mc===0?'mpill-g':'mpill-a';
+  return '<div class="month-section">'+
+    '<div class="month-heading">'+
+    '<div class="month-tag">📅 '+m.label+'</div>'+
+    '<div class="mpills"><span class="mpill mpill-n">'+m.workingDays+' working</span><span class="mpill mpill-g">'+m.presentDays+' present</span><span class="mpill '+lpc+'">'+lc+' late</span><span class="mpill '+mpc+'">'+mc+' missed</span></div>'+
+    '</div>'+
+    '<div class="tables-grid">'+
+    '<div class="table-panel"><div class="table-hdr late-hdr"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Late arrivals</div><div class="table-body late-body">'+lHTML+'</div></div>'+
+    '<div class="table-panel"><div class="table-hdr missed-hdr"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Missed punches</div><div class="table-body missed-body">'+mHTML+'</div></div>'+
+    '</div>'+pen+'</div>';
 }
+
+// INIT
+window.onload=function(){
+  document.getElementById('numberInput').addEventListener('input',renderNum);
+  document.getElementById('numberInput').addEventListener('keyup',renderNum);
+  document.getElementById('transIn').addEventListener('keydown',function(e){if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))doTranslate();});
+};
 </script>
 </body>
 </html>
