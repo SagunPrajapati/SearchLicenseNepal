@@ -733,37 +733,88 @@ function clearTranslit(){
 
 // ═══ NUMBER ═══
 var OU=['','एक','दुई','तीन','चार','पाँच','छ','सात','आठ','नौ','दश','एघार','बाह्र','तेह्र','चौध','पन्ध्र','सोह्र','सत्र','अठार','उन्नाइस','बीस','एक्काइस','बाइस','तेइस','चौबीस','पच्चीस','छब्बीस','सत्ताइस','अठ्ठाइस','उनन्तीस','तीस','एकतीस','बत्तीस','तेत्तीस','चौतीस','पैंतीस','छत्तीस','सैंतीस','अठतीस','उनचालीस','चालीस','एकचालीस','बयालीस','त्रियालीस','चवालीस','पैंतालीस','छयालीस','सतचालीस','अठचालीस','उनपचास','पचास','एकाउन्न','बाउन्न','त्रिपन्न','चौपन्न','पचपन्न','छपन्न','सन्ताउन्न','अठाउन्न','उनसठी','साठी','एकसठी','बासठी','त्रिसठी','चौसठी','पैंसठी','छैसठी','सत्सठी','अठसठी','उनसत्तरी','सत्तरी','एकहत्तर','बहत्तर','त्रिहत्तर','चौहत्तर','पचहत्तर','छहत्तर','सतहत्तर','अठहत्तर','उनासी','असी','एकासी','बयासी','त्र्यासी','चौरासी','पचासी','छयासी','सतासी','अठासी','उनान्नब्बे','नब्बे','एकानब्बे','बयानब्बे','त्रियानब्बे','चौरानब्बे','पन्चानब्बे','छयानब्बे','सन्तानब्बे','अठानब्बे','उनन्सय'];
-var OP=['','Ps',"b'O",'tLg','rf/','kfFr','5','xft','cf7','gf}','bz','P3f/','afXb','tXb','rf}w','kGb','xf]Xb','xb','c7f/','pgfOx','aLx','PsfOx','afOx','tPOx','rf}aLx','kRrLx','5AaLx','xQfOx','c7AaLx','pgGtLx','tLx','PstLx','aQtLx','tPQtLx','rf}tLx','k}FtLx','5QrLx','x}FtLx','c7tLx','pgrf/Lx','rf/Lx','PsrfnLx','aofnLx','l8ofnLx','rjfnLx','k}FtfnLx','5ofnLx','xrfnLx','c7rfnLx','pgkrfx','krfx','Psf}Gg','af}Gg','l8kGg','rf}kGg','krkGg','5kGg','xGtf}Gg','c7f}Gg','pgx7L','xf7L','Psx7L','afx7L','l8x7L','rf}x7L','k}Fx7L','5}x7L','xrx7L','c7x7L','pgxQrL','xQrL','Ps]Qr','a]Qr','l8]Qr','rf}]Qr','kr]Qr','5]Qr','xr]Qr','c7]Qr','pgfxL','cxL','PsfxL','aofxL','l8ofxL','rf}]fxL','krfxL','5ofxL','xrfxL','c7fxL','pgfGA]','GAA]','PsfGA]','aofGA]','l8ofGA]','rf}]fGA]','kGrfGA]','5ofGA]','xGtfGA]','c7fGA]','pgGxy'];
 var numCur='rupees',numLU='',numLP='';
 function setCur(c){numCur=c;document.querySelectorAll('.cur-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('cur-'+c).classList.add('active');renderNum();}
 function setNum(n){document.getElementById('numberInput').value=n;renderNum();}
+
+// Step 1: number -> Nepali Unicode words only
 function toNW(n){
-  if(n===0)return{u:'शून्य',p:'zGo'};
-  var u=[],p=[];
-  function a(v,us,ps){if(v>0){u.push(OU[v]+us);p.push(OP[v]+ps);}}
-  a(Math.floor(n/1000000000),' अरब',' c/a');n%=1000000000;
-  a(Math.floor(n/10000000),' करोड',' s/f]8');n%=10000000;
-  a(Math.floor(n/100000),' लाख',' nfv');n%=100000;
-  a(Math.floor(n/1000),' हजार',' xhf/');n%=1000;
-  a(Math.floor(n/100),' सय',' xo');n%=100;
-  if(n>0){u.push(OU[n]);p.push(OP[n]);}
-  return{u:u.join(' '),p:p.join(' ')};
+  if(n===0)return 'शून्य';
+  var parts=[];
+  function a(v,suffix){if(v>0)parts.push(OU[v]+suffix);}
+  a(Math.floor(n/1000000000),' अरब');n%=1000000000;
+  a(Math.floor(n/10000000),' करोड');n%=10000000;
+  a(Math.floor(n/100000),' लाख');n%=100000;
+  a(Math.floor(n/1000),' हजार');n%=1000;
+  a(Math.floor(n/100),' सय');n%=100;
+  if(n>0)parts.push(OU[n]);
+  return parts.join(' ');
 }
+
 function renderNum(){
   var val=document.getElementById('numberInput').value;
   var uE=document.getElementById('numU'),pE=document.getElementById('numP');
-  if(val===''){uE.className='nv ph';uE.textContent='Enter a number above…';pE.className='nv ph';pE.style.fontSize='14px';pE.textContent='Preeti output will appear here…';return;}
+  if(val===''){
+    uE.className='nv ph';uE.textContent='Enter a number above…';
+    pE.className='nv ph';pE.style.fontSize='14px';pE.textContent='Preeti output will appear here…';
+    return;
+  }
   var num=parseInt(val,10);
   if(isNaN(num)||num<0||num>9999999999){uE.className='nv ph';uE.textContent='Valid range: 0–999,99,99,999';return;}
-  var r=toNW(num);numLU=r.u;numLP=r.p;
-  if(numCur==='rupees'){numLU+=' रुपैयाँ';numLP+=' ?kof+';}
-  else if(numCur==='paisa'){numLU+=' पैसा';numLP+=' k}xf';}
+
+  // Step 1: build full Unicode string
+  numLU=toNW(num);
+  if(numCur==='rupees') numLU+=' रुपैयाँ';
+  else if(numCur==='paisa') numLU+=' पैसा';
+
+  // Step 2: convert Unicode -> Preeti automatically via u2p()
+  numLP=u2p(numLU);
+
   uE.className='nv';uE.textContent=numLU;
   pE.className='nv preeti-v';pE.style.fontSize='';pE.textContent=numLP;
 }
 function u2p(t){
-  var m={'अ':'c','आ':'cf','इ':'O','ई':'O{','उ':'p','ऊ':'pm','ए':'P','ऐ':'P{','ओ':'cf]','औ':'cf}','क':'s','ख':'v','ग':'u','घ':'3','ङ':'Ë','च':'r','छ':'5','ज':'h','झ':'em','ञ':'~','ट':'6','ठ':'7','ड':'8','ढ':'9','ण':'+','त':'t','थ':'y','द':'b','ध':'w','न':'g','प':'k','फ':'km','ब':'a','भ':'e','म':'d','य':'o','र':'/','ल':'n','व':'j','श':'z','ष':'{','स':'x','ह':'x','ा':'f','ि':'L','ी':'Lf','ु':'p','ू':'pm','े':']','ै':'}{','ो':'f]','ौ':'f}','्':'\\','ं':'+','ः':' M','०':')','१':'!','२':'@','३':'#','४':'$','५':'%','६':'^','७':'&','८':'*','९':'(','।':' .'};
-  var o='';for(var i=0;i<t.length;i++)o+=m[t[i]]!==undefined?m[t[i]]:t[i];return o;
+  // Verified Preeti map. Reference: 1234=Ps xhf/ b'O{ ;o rf}tL; ?k}ofF
+  var m={
+    'क':'s','ख':'v','ग':'u','घ':'3','ङ':'ª',
+    'च':'r','छ':'5','ज':'h','झ':'em','ञ':'~',
+    'ट':'6','ठ':'7','ड':'8','ढ':'9','ण':'0',
+    'त':'t','थ':'y','द':'b','ध':'w','न':'g',
+    'प':'k','फ':'km','ब':'a','भ':'e','म':'d',
+    'य':'o','र':'/','ल':'n','व':'j','श':'z',
+    'ष':'{','स':';','ह':'x',
+    'ा':'f','ि':'l','ी':'L','ु':"'",'ू':'"',
+    'े':']','ै':'}','ो':'f]','ौ':'f}','ृ':"'",
+    '्':'\\','ं':'+','ँ':'F','ः':'M',
+    'अ':'c','आ':'cf','इ':'O','ई':'O{',
+    'उ':'p','ऊ':'pm','ए':'P','ऐ':'P}',
+    'ओ':'cf]','औ':'cf}',
+    '०':')','१':'!','२':'@','३':'#','४':'$',
+    '५':'%','६':'^','७':'&','८':'*','९':'(',
+    '।':' .',' ':' ',
+  };
+  var out='', i=0;
+  while(i<t.length){
+    var ch=t[i], nx=t[i+1], nx2=t[i+2];
+    // रु ligature -> ?
+    if(ch==='\u0930' && nx==='\u0941'){out+='?';i+=2;continue;}
+    // Conjuncts: ch + ् + next
+    if(nx==='\u094d'){
+      // ् + र (any consonant + halant + र) -> consonant + |
+      if(nx2==='\u0930'){out+=(m[ch]||ch)+'|';i+=3;continue;}
+      // न् -> G (half-na)
+      if(ch==='\u0928'){out+='G';i+=2;continue;}
+      // ब् -> A (half-ba)
+      if(ch==='\u092c'){out+='A';i+=2;continue;}
+      // त् + त -> Q (double-ta conjunct)
+      if(ch==='\u0924' && nx2==='\u0924'){out+='Q';i+=3;continue;}
+      // default: consonant + backslash
+      out+=(m[ch]||ch)+'\\';i+=2;continue;
+    }
+    out+=m[ch]!==undefined?m[ch]:ch;
+    i++;
+  }
+  return out;
 }
 function cpEl(id,btnId){
   var text=document.getElementById(id).textContent;
