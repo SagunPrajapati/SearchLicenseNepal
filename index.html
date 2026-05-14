@@ -56,12 +56,7 @@
 body {
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
-  /* Default = attendance green bg */
-  background:
-    radial-gradient(ellipse at 0% 0%, var(--att-bg-grad1) 0%, transparent 55%),
-    radial-gradient(ellipse at 100% 0%, var(--att-bg-grad2) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, var(--att-bg-grad3) 0%, transparent 60%),
-    var(--att-bg);
+  background: var(--att-bg);           /* This is the light green you like */
   background-attachment: fixed;
   color: var(--att-text);
   transition: background 0.3s;
