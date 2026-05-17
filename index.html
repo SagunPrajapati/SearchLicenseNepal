@@ -65,14 +65,6 @@ body {
   background-attachment: fixed;
   color: var(--att-text);
   transition: background 0.3s;
-}
-body.dark-mode {
-  background:
-    radial-gradient(ellipse at 10% 0%, rgba(201,151,58,.07) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 100%, rgba(192,57,43,.05) 0%, transparent 45%),
-    var(--tr-bg);
-  color: var(--tr-text);
-}
 
 /* ════ TOP HEADER ════ */
 header {
@@ -546,15 +538,6 @@ function switchApp(name) {
   document.querySelectorAll('.nav-tab').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-  // Theme switch
-  if (name === 'translator') {
-    document.body.classList.add('dark-mode');
-  } else {
-    document.body.classList.remove('dark-mode');
-  }
-  document.getElementById('att-new-btn').style.display = (name === 'attendance' && attHasReport) ? '' : 'none';
-  window.scrollTo(0, 0);
-}
 
 // ═══════════════════════════════════════════
 //  TRANSLATOR SUB-TABS
