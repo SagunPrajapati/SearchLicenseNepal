@@ -538,6 +538,9 @@ function switchApp(name) {
   document.querySelectorAll('.nav-tab').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
+  document.getElementById('att-new-btn').style.display = (name === 'attendance' && attHasReport) ? '' : 'none';
+  window.scrollTo(0, 0);
+}
 
 // ═══════════════════════════════════════════
 //  TRANSLATOR SUB-TABS
